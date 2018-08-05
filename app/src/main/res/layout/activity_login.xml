@@ -6,31 +6,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/login_activity_bg"
     tools:context="com.example.maask.deliveryagentchatbot.LoginActivity">
 
-    <LinearLayout
-        android:gravity="center"
+    <ImageView
+        android:paddingTop="200dp"
+        android:src="@drawable/app_logo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content" />
 
-        <CheckBox
-            android:id="@+id/client_cb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+    <TextView
+        android:textStyle="bold"
+        android:textColor="@color/colorAccent"
+        android:textSize="30dp"
+        android:fontFamily="sans-serif-condensed"
+        android:textAlignment="center"
+        android:text="FreeDe"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <RadioGroup
+        android:id="@+id/client_delivery_rg"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:fontFamily="sans-serif-condensed"
+            android:id="@+id/client_rb"
+            android:textColor="@android:color/white"
+            android:buttonTint="@android:color/white"
             android:text="Client"
-            android:textColor="@color/colorAccent" />
-
-        <CheckBox
-            android:id="@+id/delivery_cb"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="Delivery man"
-            android:textColor="@color/colorAccent" />
+            android:layout_height="wrap_content" />
 
-    </LinearLayout>
+        <RadioButton
+            android:fontFamily="sans-serif-condensed"
+            android:id="@+id/delivery_man_rb"
+            android:textColor="@android:color/white"
+            android:buttonTint="@android:color/white"
+            android:text="Delivery Man"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RadioGroup>
 
     <com.google.android.gms.common.SignInButton
         android:layout_marginTop="10dp"

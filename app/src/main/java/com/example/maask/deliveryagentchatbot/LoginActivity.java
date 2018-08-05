@@ -9,6 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -28,6 +31,8 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private RadioGroup clientDeliveryRG;
+    private RadioButton clientRB,deliveryManRB;
 
     private SignInButton googleLoginBT;
     private static final String TAG = "Google login fail - ";
@@ -37,10 +42,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
 
-    private static final String PREFERENCES_KEY  = "tms_preferences";
+    private static final String PREFERENCES_KEY  = "freede_preferences";
     private static final String VISIT_LOGIN      = "visit_login";
 
     SharedPreferences sharedPreferences;
+
+    public int clientOrDeliveryMan = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +60,9 @@ public class LoginActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         googleLoginBT = findViewById(R.id.google_login);
+        clientDeliveryRG = findViewById(R.id.client_delivery_rg);
+        clientRB = findViewById(R.id.client_rb);
+        deliveryManRB = findViewById(R.id.delivery_man_rb);
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -67,6 +77,14 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }).addApi(Auth.GOOGLE_SIGN_IN_API,googleSignInOptions)
                 .build();
+
+        clientDeliveryRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                clientOrDeliveryMan = i;
+                Log.e("onCheckedChanged: ",String.valueOf(clientOrDeliveryMan));
+            }
+        });
 
         googleLoginBT.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,20 +108,16 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
 
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
 
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
 
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
-                // ...
             }
         }
     }
@@ -112,28 +126,29 @@ public class LoginActivity extends AppCompatActivity {
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         auth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
 
-                            progressDialog.dismiss();
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString(VISIT_LOGIN, "Y");
-                            editor.commit();
+                    progressDialog.dismiss();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(VISIT_LOGIN, "Y");
+                    editor.commit();
 
-                            Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
+                    Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                    intent.putExtra("clientOrDeliveryMan",String.valueOf(clientOrDeliveryMan));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
 
-                        } else {
+                } else {
 
-                            progressDialog.dismiss();
-                            Toast.makeText(LoginActivity.this, "ERROR : Sorry Sir/Mam some thing wrong .. !", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                    Toast.makeText(LoginActivity.this, "ERROR : Sorry Sir/Mam some thing wrong .. !", Toast.LENGTH_SHORT).show();
 
-                        }
-                    }
-                });
+                }
+            }
+        });
     }
 
 }
