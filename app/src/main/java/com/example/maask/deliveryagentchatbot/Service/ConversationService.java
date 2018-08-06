@@ -15,7 +15,7 @@ import retrofit2.http.POST;
 public interface ConversationService {
 
     @Headers({
-            "Authorization: Bearer a78734f0cad44eca9ebc7270f68ad23f",
+            "Authorization: Bearer a1c3d31db11f4a1392c79dd6a531b4c0",
             "Content-Type: application/json",
     })
     @POST("/v1/query?v=20150910")
