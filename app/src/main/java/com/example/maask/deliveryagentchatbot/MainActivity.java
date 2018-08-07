@@ -3,6 +3,7 @@ package com.example.maask.deliveryagentchatbot;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,22 +12,26 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.example.maask.deliveryagentchatbot.Adapter.ConversationAdapter;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
 import com.example.maask.deliveryagentchatbot.RequestClass.Request;
+import com.example.maask.deliveryagentchatbot.ResponseClass.EntityResponse;
 import com.example.maask.deliveryagentchatbot.ResponseClass.Response;
 import com.example.maask.deliveryagentchatbot.Service.ConversationService;
+import com.example.maask.deliveryagentchatbot.Service.EntityService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Conversation> conversationList;
     private ConversationAdapter conversationAdapter;
 
+    private HorizontalScrollView quickReplayHSV;
+    private LinearLayout quickReplayLL;
+    private EntityService entityService;
+
+    public static final String BASE_URL = "https://api.dialogflow.com/";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
         userQueryET = findViewById(R.id.user_query_et);
         botResponseLoader = findViewById(R.id.bot_response_loader);
         conversationRV = findViewById(R.id.conversation_rv);
+        quickReplayHSV = findViewById(R.id.quick_replay_hsv);
+        quickReplayLL = findViewById(R.id.quick_replay_ll);
 
         toolbar = findViewById(R.id.custom_toolbar);
         toolbar.setTitle("Home");
@@ -78,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         conversationList = new ArrayList<>();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.dialogflow.com/")
+                .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -157,13 +170,19 @@ public class MainActivity extends AppCompatActivity {
                 botResponseLoader.setVisibility(View.GONE);
                 String botResponse = response.body().getResult().getFulfillment().getSpeech();
 
-                Conversation conversation = new Conversation(false,botResponse);
-                conversationList.add(conversation);
-                conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
-                conversationAdapter.instantDataChang(conversationList);
-                conversationRV.setAdapter(conversationAdapter);
+                if (botResponse.equals("productAttribute")){
+                    botResponse = "Let me know your product Attribute";
+                    showBotResponse(botResponse);
+                    createQuickReplayButton("306d2688-705b-494f-837d-5e3c72c34960");
+                }else if (botResponse.equals("productType")){
+                    botResponse = "Let me know your product Type";
+                    showBotResponse(botResponse);
+                    createQuickReplayButton("bed3e76c-029d-45c8-a45f-15248d6a83cb");
+                }else {
 
-                conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
+                    showBotResponse(botResponse);
+
+                }
 
             }
 
@@ -172,6 +191,81 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("onFailure: ",t.getMessage());
             }
         });
+
+    }
+
+    private void createQuickReplayButton(String entityId) {
+
+        quickReplayHSV.setVisibility(View.VISIBLE);
+
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT);
+
+        String url = String.format("v1/entities/%s?v=20150910/",entityId);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        entityService = retrofit.create(EntityService.class);
+
+        Call<EntityResponse> entityResponseCall = entityService.getResponse(url);
+
+        entityResponseCall.enqueue(new Callback<EntityResponse>() {
+            @Override
+            public void onResponse(Call<EntityResponse> call, retrofit2.Response<EntityResponse> response) {
+                if (response.isSuccessful()){
+
+                    Log.e("id:",response.body().getId());
+                    List<EntityResponse.Entry> entries = response.body().getEntries();
+
+                    quickReplayLL.removeAllViews();
+
+                    for (int i = 0; i < entries.size(); i++) {
+
+                        Button quickReplayBtn = new Button(MainActivity.this);
+                        quickReplayBtn.setLayoutParams(lp);
+                        quickReplayBtn.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+                        quickReplayBtn.setText(entries.get(i).getValue());
+                        quickReplayBtn.setId(i);
+
+                        quickReplayLL.addView(quickReplayBtn);
+
+                        quickReplayBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                quickReplayHSV.setVisibility(View.GONE);
+                                Button clickedButton = (Button) view;
+                                String replay = clickedButton.getText().toString();
+                                getBotResponse(replay);
+
+                            }
+
+                        });
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<EntityResponse> call, Throwable t) {
+                Log.e("onFailure: ",t.getMessage());
+            }
+        });
+
+    }
+
+    private void showBotResponse(String botResponse) {
+
+        Conversation conversation = new Conversation(false,botResponse);
+        conversationList.add(conversation);
+        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
+        conversationAdapter.instantDataChang(conversationList);
+        conversationRV.setAdapter(conversationAdapter);
+        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
 
     }
 
@@ -200,9 +294,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.changed_pass:
-
                 Toast.makeText(this, "Changed Password clicked !", Toast.LENGTH_SHORT).show();
-
                 break;
 
             case android.R.id.home:
@@ -212,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+
     }
 
 }
