@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.maask.deliveryagentchatbot.GoogleMapActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:elevation="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/custom_toolbar"
+        android:background="@android:color/transparent"
+        app:popupTheme="@style/AppTheme"
+        app:theme="@style/ToolbarColoredBackArrow"/>
+
+    <View
+        android:background="#e2e2e2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <LinearLayout
+        android:background="#e7e7e7"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:src="@drawable/info_icon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:background="#ddefefef"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:layout_weight="5"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="italic"
+            android:fontFamily="sans-serif-condensed"
+            android:text="Click long on the google map in two different place, First click will count as starting position and next click count as destination pint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:id="@+id/google_map_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/status_ll"
+            android:padding="10dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:elevation="5dp"
+                android:id="@+id/ok_iv"
+                android:layout_marginRight="1dp"
+                android:background="#e7e7e7"
+                android:padding="10dp"
+                android:src="@drawable/ok_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:elevation="5dp"
+                android:id="@+id/refresh_iv"
+                android:background="#e7e7e7"
+                android:padding="10dp"
+                android:src="@drawable/refresh_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.maask.deliveryagentchatbot.Adapter.ConversationAdapter;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
@@ -48,10 +50,11 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private DatabaseReference databaseReference;
 
-    android.support.v7.widget.Toolbar toolbar;
+    Toolbar toolbar;
 
     private ImageView sendIV;
     private EditText userQueryET;
+    private TextView botQueryTV;
 
     private ConversationService conversationService;
     private ProgressBar botResponseLoader;
@@ -60,11 +63,13 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Conversation> conversationList;
     private ConversationAdapter conversationAdapter;
 
+    private LinearLayout quickReplayViewLL;
     private HorizontalScrollView quickReplayHSV;
     private LinearLayout quickReplayLL;
     private EntityService entityService;
 
     public static final String BASE_URL = "https://api.dialogflow.com/";
+    private ArrayList<String> yesNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +82,18 @@ public class MainActivity extends AppCompatActivity {
         conversationRV = findViewById(R.id.conversation_rv);
         quickReplayHSV = findViewById(R.id.quick_replay_hsv);
         quickReplayLL = findViewById(R.id.quick_replay_ll);
+        quickReplayViewLL = findViewById(R.id.quick_replay_view_ll);
+        botQueryTV = findViewById(R.id.bot_query_tv);
 
         toolbar = findViewById(R.id.custom_toolbar);
         toolbar.setTitle("Home");
         toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        yesNo = new ArrayList<>();
+        yesNo.add("Yes");
+        yesNo.add("No");
 
         LinearLayoutManager lm = new LinearLayoutManager(this);
         lm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -112,7 +123,19 @@ public class MainActivity extends AppCompatActivity {
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
                 databaseReference.keepSynced(true);
+
                 String clientOrDeliverMan = getIntent().getExtras().getString("clientOrDeliveryMan");
+
+                String lat = getIntent().getExtras().getString("lat");
+                String lon = getIntent().getExtras().getString("lon");
+
+                if (lat != null && !lat.isEmpty() && !lon.isEmpty()) {
+
+                    botResponseLoader.setVisibility(View.VISIBLE);
+                    String latLon = lat+"/"+lon;
+                    getBotResponse(latLon);
+
+                }
 
                 Log.e("onCreate: ",clientOrDeliverMan);
 
@@ -139,9 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
                         sendIV.setVisibility(View.GONE);
                         botResponseLoader.setVisibility(View.VISIBLE);
-                        Conversation conversation = new Conversation(true,userQuery);
-                        conversationList.add(conversation);
-                        getBotResponse(userQuery);
+                        showUserQuery(userQuery);
 
                     }
 
@@ -149,6 +170,14 @@ public class MainActivity extends AppCompatActivity {
             });
 
         }
+    }
+
+    private void showUserQuery(String userQuery) {
+
+        Conversation conversation = new Conversation(true,userQuery);
+        conversationList.add(conversation);
+        getBotResponse(userQuery);
+
     }
 
     private void getBotResponse(String userQuery) {
@@ -170,14 +199,51 @@ public class MainActivity extends AppCompatActivity {
                 botResponseLoader.setVisibility(View.GONE);
                 String botResponse = response.body().getResult().getFulfillment().getSpeech();
 
-                if (botResponse.equals("productAttribute")){
+                if (botResponse.equals("ProductDetailsSure")){
+
+                    botResponse = "Do you want to give us your details?";
+
+                    quickReplayViewLL.setVisibility(View.VISIBLE);
+                    botQueryTV.setText(botResponse);
+
+                    showBotResponse(botResponse);
+                    createQuickReplayButton(yesNo);
+
+                }else if (botResponse.equals("productAttribute")){
+
                     botResponse = "Let me know your product Attribute";
+
+                    quickReplayViewLL.setVisibility(View.VISIBLE);
+                    botQueryTV.setText(botResponse);
+
                     showBotResponse(botResponse);
-                    createQuickReplayButton("306d2688-705b-494f-837d-5e3c72c34960");
+                    getAgentEntities("306d2688-705b-494f-837d-5e3c72c34960");
+
                 }else if (botResponse.equals("productType")){
+
                     botResponse = "Let me know your product Type";
+
+                    quickReplayViewLL.setVisibility(View.VISIBLE);
+                    botQueryTV.setText(botResponse);
+
                     showBotResponse(botResponse);
-                    createQuickReplayButton("bed3e76c-029d-45c8-a45f-15248d6a83cb");
+                    getAgentEntities("bed3e76c-029d-45c8-a45f-15248d6a83cb");
+
+                }else if (botResponse.equals("productWeight")){
+
+                    botResponse = "Tell me your product weight in [Kg] unit";
+                    showBotResponse(botResponse);
+
+                }else if (botResponse.equals("productLength")){
+
+                    botResponse = "Tell me your product length in [Meter] unit";
+                    showBotResponse(botResponse);
+
+                }else if (botResponse.equals("startAndEndLoaction")){
+
+                    Intent intent = new Intent(MainActivity.this,GoogleMapActivity.class);
+                    startActivity(intent);
+
                 }else {
 
                     showBotResponse(botResponse);
@@ -194,11 +260,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void createQuickReplayButton(String entityId) {
+    private void showBotResponse(String botResponse) {
 
-        quickReplayHSV.setVisibility(View.VISIBLE);
+        Conversation conversation = new Conversation(false,botResponse);
+        conversationList.add(conversation);
+        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
+        conversationAdapter.instantDataChang(conversationList);
+        conversationRV.setAdapter(conversationAdapter);
+        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
 
-        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT);
+    }
+
+    private void getAgentEntities(String entityId) {
+
+        final ArrayList<String> entities = new ArrayList<>();
 
         String url = String.format("v1/entities/%s?v=20150910/",entityId);
 
@@ -216,36 +291,15 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<EntityResponse> call, retrofit2.Response<EntityResponse> response) {
                 if (response.isSuccessful()){
 
-                    Log.e("id:",response.body().getId());
+                    entities.clear();
+
                     List<EntityResponse.Entry> entries = response.body().getEntries();
 
-                    quickReplayLL.removeAllViews();
-
                     for (int i = 0; i < entries.size(); i++) {
-
-                        Button quickReplayBtn = new Button(MainActivity.this);
-                        quickReplayBtn.setLayoutParams(lp);
-                        quickReplayBtn.setTextColor(getResources().getColor(R.color.colorPrimary));
-
-                        quickReplayBtn.setText(entries.get(i).getValue());
-                        quickReplayBtn.setId(i);
-
-                        quickReplayLL.addView(quickReplayBtn);
-
-                        quickReplayBtn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-
-                                quickReplayHSV.setVisibility(View.GONE);
-                                Button clickedButton = (Button) view;
-                                String replay = clickedButton.getText().toString();
-                                getBotResponse(replay);
-
-                            }
-
-                        });
-
+                        entities.add(entries.get(i).getValue());
                     }
+
+                    createQuickReplayButton(entities);
 
                 }
             }
@@ -258,14 +312,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showBotResponse(String botResponse) {
+    private void createQuickReplayButton(ArrayList<String> entities) {
 
-        Conversation conversation = new Conversation(false,botResponse);
-        conversationList.add(conversation);
-        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
-        conversationAdapter.instantDataChang(conversationList);
-        conversationRV.setAdapter(conversationAdapter);
-        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT);
+
+        quickReplayLL.removeAllViews();
+
+        for (int i = 0; i < entities.size(); i++) {
+
+            Button quickReplayBtn = new Button(MainActivity.this);
+
+            quickReplayBtn.setLayoutParams(lp);
+            quickReplayBtn.setTextColor(getResources().getColor(R.color.colorPrimary));
+            quickReplayBtn.setAllCaps(false);
+            quickReplayBtn.setText(entities.get(i));
+            quickReplayBtn.setId(i);
+
+            quickReplayLL.addView(quickReplayBtn);
+
+            quickReplayBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    quickReplayViewLL.setVisibility(View.GONE);
+                    Button clickedButton = (Button) view;
+                    String replay = clickedButton.getText().toString();
+                    showUserQuery(replay);
+
+                }
+
+            });
+
+        }
 
     }
 
