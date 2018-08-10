@@ -40,6 +40,8 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_map);
 
+        final String sessionId = getIntent().getExtras().getString("sessionId");
+
         statusLL = findViewById(R.id.status_ll);
         okIV = findViewById(R.id.ok_iv);
         refreshIV = findViewById(R.id.refresh_iv);
@@ -72,14 +74,22 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
             @Override
             public void onClick(View view) {
 
-                double lat = latLngs.get(0).latitude;
-                double lon = latLngs.get(1).longitude;
+                double startLat = latLngs.get(0).latitude;
+                double startLon = latLngs.get(0).longitude;
+
+                double endLat = latLngs.get(1).latitude;
+                double endLon = latLngs.get(1).longitude;
 
                 Intent intent = new Intent(GoogleMapActivity.this,MainActivity.class);
-                intent.putExtra("lat",String.valueOf(lat));
-                intent.putExtra("lon",String.valueOf(lon));
+                intent.putExtra("startLat",String.valueOf(startLat));
+                intent.putExtra("startLon",String.valueOf(startLon));
+                intent.putExtra("endLat",String.valueOf(endLat));
+                intent.putExtra("endLon",String.valueOf(endLon));
+                intent.putExtra("sessionId",sessionId);
+
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+
 
             }
         });

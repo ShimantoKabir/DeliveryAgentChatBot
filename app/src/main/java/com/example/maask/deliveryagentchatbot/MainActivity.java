@@ -3,7 +3,6 @@ package com.example.maask.deliveryagentchatbot;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.maask.deliveryagentchatbot.Adapter.ConversationAdapter;
+import com.example.maask.deliveryagentchatbot.HelperClass.Session;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
 import com.example.maask.deliveryagentchatbot.RequestClass.Request;
 import com.example.maask.deliveryagentchatbot.ResponseClass.EntityResponse;
@@ -34,7 +34,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -70,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String BASE_URL = "https://api.dialogflow.com/";
     private ArrayList<String> yesNo;
+
+    Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         conversationService = retrofit.create(ConversationService.class);
 
         sharedPreferences = getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
+
         if (!sharedPreferences.getString(VISIT_LOGIN, "").equals("Y")) {
 
             Intent intent = new Intent(this, LoginActivity.class);
@@ -124,16 +126,37 @@ public class MainActivity extends AppCompatActivity {
                 databaseReference = FirebaseDatabase.getInstance().getReference();
                 databaseReference.keepSynced(true);
 
+                session = new Session(this);
+                session.setNewSessionId(session.generateRandomSessionId());
+
                 String clientOrDeliverMan = getIntent().getExtras().getString("clientOrDeliveryMan");
 
-                String lat = getIntent().getExtras().getString("lat");
-                String lon = getIntent().getExtras().getString("lon");
+                String startLat = getIntent().getExtras().getString("startLat");
+                String startLon = getIntent().getExtras().getString("startLon");
 
-                if (lat != null && !lat.isEmpty() && !lon.isEmpty()) {
+                String endLat = getIntent().getExtras().getString("endLat");
+                String endLon = getIntent().getExtras().getString("endLon");
 
+                String sessionId = getIntent().getExtras().getString("sessionId");
+
+                if (
+                        startLat != null &&
+                        startLon != null &&
+                        endLat != null &&
+                        endLon != null &&
+                        sessionId != null &&
+                        !startLon.isEmpty() &&
+                        !startLat.isEmpty() &&
+                        !endLat.isEmpty() &&
+                        !endLon.isEmpty() &&
+                        !sessionId.isEmpty()
+
+                        ) {
+
+                    session.resetSessionId(sessionId);
                     botResponseLoader.setVisibility(View.VISIBLE);
-                    String latLon = lat+"/"+lon;
-                    getBotResponse(latLon);
+                    String startAndEndPosition = startLat+"/"+startLon+"/"+endLat+"/"+endLon;
+                    getBotResponse(startAndEndPosition);
 
                 }
 
@@ -172,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void showUserQuery(String userQuery) {
 
         Conversation conversation = new Conversation(true,userQuery);
@@ -185,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         Request request = new Request();
         request.setLang("en");
         request.setQuery(userQuery);
-        request.setSessionId("12345");
+        request.setSessionId(session.getSessionId());
         request.setTimezone("America/New_York");
 
         Call<Response> responseCall = conversationService.getResponse(request);
@@ -199,55 +223,70 @@ public class MainActivity extends AppCompatActivity {
                 botResponseLoader.setVisibility(View.GONE);
                 String botResponse = response.body().getResult().getFulfillment().getSpeech();
 
-                if (botResponse.equals("ProductDetailsSure")){
+                switch (botResponse) {
+                    case "ProductDetailsSure":
 
-                    botResponse = "Do you want to give us your details?";
+                        botResponse = "Do you want to give us your product details?";
 
-                    quickReplayViewLL.setVisibility(View.VISIBLE);
-                    botQueryTV.setText(botResponse);
+                        quickReplayViewLL.setVisibility(View.VISIBLE);
+                        botQueryTV.setText(botResponse);
 
-                    showBotResponse(botResponse);
-                    createQuickReplayButton(yesNo);
+                        showBotResponse(botResponse);
+                        createQuickReplayButton(yesNo);
 
-                }else if (botResponse.equals("productAttribute")){
+                        break;
+                    case "productAttribute":
 
-                    botResponse = "Let me know your product Attribute";
+                        botResponse = "Let me know your product Attribute";
 
-                    quickReplayViewLL.setVisibility(View.VISIBLE);
-                    botQueryTV.setText(botResponse);
+                        quickReplayViewLL.setVisibility(View.VISIBLE);
+                        botQueryTV.setText(botResponse);
 
-                    showBotResponse(botResponse);
-                    getAgentEntities("306d2688-705b-494f-837d-5e3c72c34960");
+                        showBotResponse(botResponse);
+                        getAgentEntities("306d2688-705b-494f-837d-5e3c72c34960");
 
-                }else if (botResponse.equals("productType")){
+                        break;
+                    case "productType":
 
-                    botResponse = "Let me know your product Type";
+                        botResponse = "Let me know your product Type";
 
-                    quickReplayViewLL.setVisibility(View.VISIBLE);
-                    botQueryTV.setText(botResponse);
+                        quickReplayViewLL.setVisibility(View.VISIBLE);
+                        botQueryTV.setText(botResponse);
 
-                    showBotResponse(botResponse);
-                    getAgentEntities("bed3e76c-029d-45c8-a45f-15248d6a83cb");
+                        showBotResponse(botResponse);
+                        getAgentEntities("bed3e76c-029d-45c8-a45f-15248d6a83cb");
 
-                }else if (botResponse.equals("productWeight")){
+                        break;
+                    case "productWeight":
 
-                    botResponse = "Tell me your product weight in [Kg] unit";
-                    showBotResponse(botResponse);
+                        botResponse = "Tell me your product weight in [Kg] unit";
+                        showBotResponse(botResponse);
 
-                }else if (botResponse.equals("productLength")){
+                        break;
+                    case "productLength":
 
-                    botResponse = "Tell me your product length in [Meter] unit";
-                    showBotResponse(botResponse);
+                        botResponse = "Tell me your product length in [Meter] unit";
+                        showBotResponse(botResponse);
 
-                }else if (botResponse.equals("startAndEndLoaction")){
+                        break;
+                    case "startAndEndLocation":
 
-                    Intent intent = new Intent(MainActivity.this,GoogleMapActivity.class);
-                    startActivity(intent);
+                        Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
+                        intent.putExtra("sessionId",session.getSessionId());
+                        startActivity(intent);
 
-                }else {
+                        break;
+                    case "postTheJob":
 
-                    showBotResponse(botResponse);
+                        botResponse = "I have successfully post your job, whenever a delivery man wants to deliver your product he/she will knock you";
+                        showBotResponse(botResponse);
 
+                        break;
+                    default:
+
+                        showBotResponse(botResponse);
+
+                        break;
                 }
 
             }
