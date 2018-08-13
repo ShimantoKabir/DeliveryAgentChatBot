@@ -14,7 +14,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_map_api" />
@@ -27,7 +26,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".LoginActivity" />
-        <activity android:name=".GoogleMapActivity"></activity>
+        <activity android:name=".GoogleMapActivity" />
+        <activity android:name=".ClientOfferedJobActivity"></activity>
     </application>
 
 </manifest>

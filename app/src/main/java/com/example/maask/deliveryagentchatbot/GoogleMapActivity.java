@@ -114,19 +114,6 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 
         switch (id) {
 
-            case R.id.profile:
-                Toast.makeText(this, "Profile clicked !", Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.logout:
-
-                Toast.makeText(this, "Logout clicked !", Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.changed_pass:
-                Toast.makeText(this, "Changed Password clicked !", Toast.LENGTH_SHORT).show();
-                break;
-
             case android.R.id.home:
 
                 double lat = latLngs.get(0).latitude;

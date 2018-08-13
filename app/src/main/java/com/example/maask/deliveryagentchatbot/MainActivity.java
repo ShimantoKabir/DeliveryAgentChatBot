@@ -3,6 +3,8 @@ package com.example.maask.deliveryagentchatbot;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.maask.deliveryagentchatbot.Adapter.ConversationAdapter;
+import com.example.maask.deliveryagentchatbot.HelperClass.ExtraUserQuery;
 import com.example.maask.deliveryagentchatbot.HelperClass.Session;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
 import com.example.maask.deliveryagentchatbot.RequestClass.Request;
@@ -72,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
     Session session;
 
+    ExtraUserQuery extraUserQuery;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,10 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         conversationList = new ArrayList<>();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         conversationService = retrofit.create(ConversationService.class);
 
@@ -128,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
 
                 session = new Session(this);
                 session.setNewSessionId(session.generateRandomSessionId());
+
+                extraUserQuery = new ExtraUserQuery(false,"nothing");
 
                 String clientOrDeliverMan = getIntent().getExtras().getString("clientOrDeliveryMan");
 
@@ -183,6 +187,10 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "INFO : Do you want to say something !", Toast.LENGTH_SHORT).show();
                     }else {
 
+                        if (extraUserQuery.needExtraUserQuery){
+                            userQuery = userQuery+" "+extraUserQuery.getExtraUserQuery();
+                        }
+
                         sendIV.setVisibility(View.GONE);
                         botResponseLoader.setVisibility(View.VISIBLE);
                         showUserQuery(userQuery);
@@ -194,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
 
     private void showUserQuery(String userQuery) {
 
@@ -215,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
         Call<Response> responseCall = conversationService.getResponse(request);
 
         responseCall.enqueue(new Callback<Response>() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
             @Override
             public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
 
@@ -222,6 +230,10 @@ public class MainActivity extends AppCompatActivity {
                 sendIV.setVisibility(View.VISIBLE);
                 botResponseLoader.setVisibility(View.GONE);
                 String botResponse = response.body().getResult().getFulfillment().getSpeech();
+
+                Log.e("onResponse: ",response.body().getStatus().getErrorType());
+
+                extraUserQuery = new ExtraUserQuery(false,"nothing");
 
                 switch (botResponse) {
                     case "ProductDetailsSure":
@@ -235,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
                         createQuickReplayButton(yesNo);
 
                         break;
+
                     case "productAttribute":
 
                         botResponse = "Let me know your product Attribute";
@@ -246,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
                         getAgentEntities("306d2688-705b-494f-837d-5e3c72c34960");
 
                         break;
+
                     case "productType":
 
                         botResponse = "Let me know your product Type";
@@ -257,15 +271,18 @@ public class MainActivity extends AppCompatActivity {
                         getAgentEntities("bed3e76c-029d-45c8-a45f-15248d6a83cb");
 
                         break;
+
                     case "productWeight":
 
-                        botResponse = "Tell me your product weight in [Kg] unit";
+                        botResponse = "Tell me your product weight";
+                        extraUserQuery = new ExtraUserQuery(true,"KG");
                         showBotResponse(botResponse);
 
                         break;
-                    case "productLength":
 
-                        botResponse = "Tell me your product length in [Meter] unit";
+                    case "productDescription":
+
+                        botResponse = "Let me know your product description";
                         showBotResponse(botResponse);
 
                         break;
@@ -276,17 +293,18 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
 
                         break;
+
                     case "postTheJob":
 
                         botResponse = "I have successfully post your job, whenever a delivery man wants to deliver your product he/she will knock you";
                         showBotResponse(botResponse);
 
                         break;
+
                     default:
-
                         showBotResponse(botResponse);
-
                         break;
+
                 }
 
             }
@@ -326,6 +344,7 @@ public class MainActivity extends AppCompatActivity {
         Call<EntityResponse> entityResponseCall = entityService.getResponse(url);
 
         entityResponseCall.enqueue(new Callback<EntityResponse>() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
             @Override
             public void onResponse(Call<EntityResponse> call, retrofit2.Response<EntityResponse> response) {
                 if (response.isSuccessful()){
@@ -351,9 +370,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void createQuickReplayButton(ArrayList<String> entities) {
 
-        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT);
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(150,50);
+        lp.setMargins(10,0,0,0);
 
         quickReplayLL.removeAllViews();
 
@@ -362,7 +383,10 @@ public class MainActivity extends AppCompatActivity {
             Button quickReplayBtn = new Button(MainActivity.this);
 
             quickReplayBtn.setLayoutParams(lp);
-            quickReplayBtn.setTextColor(getResources().getColor(R.color.colorPrimary));
+            quickReplayBtn.setPadding(10,5,10,5);
+            quickReplayBtn.setBackground(getResources().getDrawable(R.drawable.bot_query_bg));
+            quickReplayBtn.setTextColor(getResources().getColor(R.color.white));
+
             quickReplayBtn.setAllCaps(false);
             quickReplayBtn.setText(entities.get(i));
             quickReplayBtn.setId(i);
@@ -401,21 +425,9 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id){
 
-            case R.id.profile:
-                Toast.makeText(this, "Profile clicked !", Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.logout:
-
-                Toast.makeText(this, "Logout clicked !", Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.changed_pass:
-                Toast.makeText(this, "Changed Password clicked !", Toast.LENGTH_SHORT).show();
-                break;
-
-            case android.R.id.home:
-                finish();
+            case R.id.client_offered_job:
+                Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
+                startActivity(intent);
                 break;
 
         }

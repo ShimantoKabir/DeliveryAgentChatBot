@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
 import com.example.maask.deliveryagentchatbot.R;
@@ -21,6 +23,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private Context context;
     public static final int USER_QUERY_LAYOUT = 1;
     public static final int BOT_RESPONSE_LAYOUT = 2;
+    public int itemLastPosition = -1;
 
     public ConversationAdapter(ArrayList<Conversation> conversationList, Context context) {
         this.conversationList = conversationList;
@@ -63,6 +66,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         ConversationViewHolder viewHolder = (ConversationViewHolder) holder;
         viewHolder.conversationTV.setText(conversationList.get(position).getConversation());
+        setAnimation(holder.itemView,position);
 
     }
 
@@ -84,6 +88,15 @@ public class ConversationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void instantDataChang(ArrayList<Conversation> conversationList) {
         this.conversationList = conversationList;
         notifyDataSetChanged();
+    }
+
+    public void setAnimation(View viewToAnimate, int position) {
+        if (position > itemLastPosition) {
+            ScaleAnimation anim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            anim.setDuration(300);
+            viewToAnimate.startAnimation(anim);
+            itemLastPosition = position;
+        }
     }
 
 }

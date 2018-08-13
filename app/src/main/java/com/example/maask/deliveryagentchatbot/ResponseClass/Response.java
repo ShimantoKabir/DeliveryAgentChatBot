@@ -78,44 +78,6 @@ public class Response {
         this.sessionId = sessionId;
     }
 
-    public static class Context {
-
-        @SerializedName("name")
-        @Expose
-        private String name;
-        @SerializedName("parameters")
-        @Expose
-        private Parameters parameters;
-        @SerializedName("lifespan")
-        @Expose
-        private Integer lifespan;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Parameters getParameters() {
-            return parameters;
-        }
-
-        public void setParameters(Parameters parameters) {
-            this.parameters = parameters;
-        }
-
-        public Integer getLifespan() {
-            return lifespan;
-        }
-
-        public void setLifespan(Integer lifespan) {
-            this.lifespan = lifespan;
-        }
-
-    }
-
     public static class Fulfillment {
 
         @SerializedName("speech")
@@ -170,57 +132,6 @@ public class Response {
 
     }
 
-    public static class Metadata {
-
-        @SerializedName("intentId")
-        @Expose
-        private String intentId;
-        @SerializedName("webhookUsed")
-        @Expose
-        private String webhookUsed;
-        @SerializedName("webhookForSlotFillingUsed")
-        @Expose
-        private String webhookForSlotFillingUsed;
-        @SerializedName("intentName")
-        @Expose
-        private String intentName;
-
-        public String getIntentId() {
-            return intentId;
-        }
-
-        public void setIntentId(String intentId) {
-            this.intentId = intentId;
-        }
-
-        public String getWebhookUsed() {
-            return webhookUsed;
-        }
-
-        public void setWebhookUsed(String webhookUsed) {
-            this.webhookUsed = webhookUsed;
-        }
-
-        public String getWebhookForSlotFillingUsed() {
-            return webhookForSlotFillingUsed;
-        }
-
-        public void setWebhookForSlotFillingUsed(String webhookForSlotFillingUsed) {
-            this.webhookForSlotFillingUsed = webhookForSlotFillingUsed;
-        }
-
-        public String getIntentName() {
-            return intentName;
-        }
-
-        public void setIntentName(String intentName) {
-            this.intentName = intentName;
-        }
-
-    }
-
-    public static class Parameters {}
-
     public static class Result {
 
         @SerializedName("source")
@@ -235,21 +146,9 @@ public class Response {
         @SerializedName("actionIncomplete")
         @Expose
         private Boolean actionIncomplete;
-        @SerializedName("parameters")
-        @Expose
-        private Parameters parameters;
-        @SerializedName("contexts")
-        @Expose
-        private List<Context> contexts = null;
-        @SerializedName("metadata")
-        @Expose
-        private Metadata metadata;
         @SerializedName("fulfillment")
         @Expose
         private Fulfillment fulfillment;
-        @SerializedName("score")
-        @Expose
-        private Integer score;
 
         public String getSource() {
             return source;
@@ -283,44 +182,12 @@ public class Response {
             this.actionIncomplete = actionIncomplete;
         }
 
-        public Parameters getParameters() {
-            return parameters;
-        }
-
-        public void setParameters(Parameters parameters) {
-            this.parameters = parameters;
-        }
-
-        public List<Context> getContexts() {
-            return contexts;
-        }
-
-        public void setContexts(List<Context> contexts) {
-            this.contexts = contexts;
-        }
-
-        public Metadata getMetadata() {
-            return metadata;
-        }
-
-        public void setMetadata(Metadata metadata) {
-            this.metadata = metadata;
-        }
-
         public Fulfillment getFulfillment() {
             return fulfillment;
         }
 
         public void setFulfillment(Fulfillment fulfillment) {
             this.fulfillment = fulfillment;
-        }
-
-        public Integer getScore() {
-            return score;
-        }
-
-        public void setScore(Integer score) {
-            this.score = score;
         }
 
     }
@@ -333,9 +200,6 @@ public class Response {
         @SerializedName("errorType")
         @Expose
         private String errorType;
-        @SerializedName("webhookTimedOut")
-        @Expose
-        private Boolean webhookTimedOut;
 
         public Integer getCode() {
             return code;
@@ -351,14 +215,6 @@ public class Response {
 
         public void setErrorType(String errorType) {
             this.errorType = errorType;
-        }
-
-        public Boolean getWebhookTimedOut() {
-            return webhookTimedOut;
-        }
-
-        public void setWebhookTimedOut(Boolean webhookTimedOut) {
-            this.webhookTimedOut = webhookTimedOut;
         }
 
     }
