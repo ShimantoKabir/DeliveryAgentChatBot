@@ -11,7 +11,7 @@ public class ClientOfferedJob {
     private String productDescription;
     private String productType;
     private String publishData;
-    private String startAndEndLatLon;
+    private String  startAndEndLatLon;
     private Integer unitWeight;
 
     public String getDelivered() {

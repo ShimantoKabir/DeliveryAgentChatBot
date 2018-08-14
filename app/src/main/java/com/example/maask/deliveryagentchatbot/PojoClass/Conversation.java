@@ -6,27 +6,29 @@ package com.example.maask.deliveryagentchatbot.PojoClass;
 
 public class Conversation {
 
-    public boolean isMe;
-    public String conversation;
+    public String speaker;
+    public String expression;
 
-    public Conversation(boolean isMe, String conversation) {
-        this.isMe = isMe;
-        this.conversation = conversation;
+    public Conversation() {}
+
+    public Conversation(String speaker, String expression) {
+        this.speaker = speaker;
+        this.expression = expression;
     }
 
-    public boolean isMe() {
-        return isMe;
+    public String getSpeaker() {
+        return speaker;
     }
 
-    public void setMe(boolean me) {
-        isMe = me;
+    public void setSpeaker(String speaker) {
+        this.speaker = speaker;
     }
 
-    public String getConversation() {
-        return conversation;
+    public String getExpression() {
+        return expression;
     }
 
-    public void setConversation(String conversation) {
-        this.conversation = conversation;
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
 }

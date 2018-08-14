@@ -2,16 +2,26 @@ package com.example.maask.deliveryagentchatbot.Adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
 import com.example.maask.deliveryagentchatbot.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Maask on 8/5/2018.
@@ -54,7 +64,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemViewType(int position) {
-        if (conversationList.get(position).isMe){
+        if (conversationList.get(position).getSpeaker().equals("user")){
             return USER_QUERY_LAYOUT;
         }else {
             return BOT_RESPONSE_LAYOUT;
@@ -65,7 +75,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
         ConversationViewHolder viewHolder = (ConversationViewHolder) holder;
-        viewHolder.conversationTV.setText(conversationList.get(position).getConversation());
+        viewHolder.conversationTV.setText(conversationList.get(position).getExpression());
         setAnimation(holder.itemView,position);
 
     }

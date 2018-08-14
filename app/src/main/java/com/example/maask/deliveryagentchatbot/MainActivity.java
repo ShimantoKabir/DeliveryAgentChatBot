@@ -1,5 +1,6 @@
 package com.example.maask.deliveryagentchatbot;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,10 +34,19 @@ import com.example.maask.deliveryagentchatbot.Service.ConversationService;
 import com.example.maask.deliveryagentchatbot.Service.EntityService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -76,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
     Session session;
 
     ExtraUserQuery extraUserQuery;
+
+    FirebaseUser currentUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,12 +134,37 @@ public class MainActivity extends AppCompatActivity {
         } else {
 
             auth = FirebaseAuth.getInstance();
-            FirebaseUser currentUser = auth.getCurrentUser();
+            currentUser = auth.getCurrentUser();
 
             try {
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
                 databaseReference.keepSynced(true);
+
+                databaseReference.child("conversation").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+
+                            Log.e("onDataChange: ",snapshot.toString());
+                            Conversation conversation = snapshot.getValue(Conversation.class);
+                            conversationList.add(conversation);
+
+                        }
+
+                        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
+                        conversationAdapter.instantDataChang(conversationList);
+                        conversationRV.setAdapter(conversationAdapter);
+                        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.e("onCancelled: ",databaseError.getMessage());
+                    }
+                });
 
                 session = new Session(this);
                 session.setNewSessionId(session.generateRandomSessionId());
@@ -205,7 +243,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void showUserQuery(String userQuery) {
 
-        Conversation conversation = new Conversation(true,userQuery);
+        Conversation conversation = new Conversation("user",userQuery);
+        databaseReference.child("conversation").child(currentUser.getUid()).push().setValue(conversation);
+
         conversationList.add(conversation);
         getBotResponse(userQuery);
 
@@ -319,12 +359,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void showBotResponse(String botResponse) {
 
-        Conversation conversation = new Conversation(false,botResponse);
-        conversationList.add(conversation);
-        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
-        conversationAdapter.instantDataChang(conversationList);
-        conversationRV.setAdapter(conversationAdapter);
-        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
+        Conversation conversation = new Conversation("bot",botResponse);
+        databaseReference.child("conversation").child(currentUser.getUid()).push().setValue(conversation);
+
+//        conversationList.add(conversation);
+//        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
+//        conversationAdapter.instantDataChang(conversationList);
+//        conversationRV.setAdapter(conversationAdapter);
+//        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
 
     }
 
