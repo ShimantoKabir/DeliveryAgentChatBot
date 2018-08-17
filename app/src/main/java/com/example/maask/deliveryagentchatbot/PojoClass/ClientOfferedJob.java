@@ -6,13 +6,24 @@ package com.example.maask.deliveryagentchatbot.PojoClass;
 
 public class ClientOfferedJob {
 
+    private String clientId;
     private String delivered;
     private String productAttributes;
     private String productDescription;
     private String productType;
     private String publishData;
-    private String  startAndEndLatLon;
+    private String startAndEndLatLon;
     private Integer unitWeight;
+
+    public ClientOfferedJob() {}
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
     public String getDelivered() {
         return delivered;

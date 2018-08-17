@@ -7,7 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.example.maask.deliveryagentchatbot.ClientOfferedJobActivity;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
 import com.example.maask.deliveryagentchatbot.R;
 import java.util.ArrayList;
@@ -68,6 +71,12 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
         clientOfferedJobViewHolder.productWeight.setText("Weight : "+String.valueOf(clientOfferedJobs.get(position).getUnitWeight()));
         clientOfferedJobViewHolder.publishDate.setText("Publish Data : "+clientOfferedJobs.get(position).getPublishData());
 
+        if (context instanceof ClientOfferedJobActivity){
+            clientOfferedJobViewHolder.editDeleteJobLL.setVisibility(View.VISIBLE);
+        }else {
+            clientOfferedJobViewHolder.appliyJobTV.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override
@@ -77,8 +86,10 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private class ClientOfferedJobViewHolder extends RecyclerView.ViewHolder {
 
-        TextView productDescription,productAttribute,productWeight,deliveryStatus,productType,publishDate;
+        TextView productDescription,productAttribute,productWeight,deliveryStatus,productType,publishDate,appliyJobTV;
         ImageView editJobIV,deleteJobIV,startEndPosIV;
+
+        LinearLayout editDeleteJobLL;
 
         public ClientOfferedJobViewHolder(View v) {
             super(v);
@@ -93,6 +104,8 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
             editJobIV = v.findViewById(R.id.edit_job_iv);
             deleteJobIV = v.findViewById(R.id.delete_job_iv);
             startEndPosIV = v.findViewById(R.id.start_end_pos_iv);
+            editDeleteJobLL = v.findViewById(R.id.edit_delete_job_ll);
+            appliyJobTV = v.findViewById(R.id.apply_job_tv);
 
             startEndPosIV.setOnClickListener(new View.OnClickListener() {
                 @Override

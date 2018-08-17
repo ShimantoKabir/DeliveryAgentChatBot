@@ -1,7 +1,6 @@
 package com.example.maask.deliveryagentchatbot;
 
 import android.content.Intent;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,7 +10,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.example.maask.deliveryagentchatbot.Adapter.ClientOfferedJobAdapter;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,42 +22,41 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ClientOfferedJobActivity extends AppCompatActivity {
+public class JobPortalActivity extends AppCompatActivity {
 
-    Toolbar toolbar;
+    private Toolbar toolbar;
 
     private FirebaseAuth auth;
     private DatabaseReference databaseReference;
+    private FirebaseUser currentUser;
 
     private ArrayList<ClientOfferedJob> clientOfferedJobs = new ArrayList<>();
-
-    private RecyclerView clientOfferedJobRV;
     private ClientOfferedJobAdapter clientOfferedJobAdapter;
 
-    private SwipeRefreshLayout refreshCojSRL;
+    private RecyclerView jobPortalRV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_client_offered_job);
+        setContentView(R.layout.activity_job_portal);
 
         toolbar = findViewById(R.id.custom_toolbar);
-        toolbar.setTitle("Offered Job");
+        jobPortalRV = findViewById(R.id.job_portal_rv);
+
+        toolbar = findViewById(R.id.custom_toolbar);
+        toolbar.setTitle("Job Portal");
         toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        refreshCojSRL = findViewById(R.id.refresh_coj_srl);
-
-        clientOfferedJobRV = findViewById(R.id.client_offered_job_rv);
 
         LinearLayoutManager lm = new LinearLayoutManager(this);
         lm.setOrientation(LinearLayoutManager.VERTICAL);
-        clientOfferedJobRV.setLayoutManager(lm);
+        jobPortalRV.setLayoutManager(lm);
 
         auth = FirebaseAuth.getInstance();
-        final FirebaseUser currentUser = auth.getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference();
+        currentUser = auth.getCurrentUser();
 
         databaseReference.child("clientOfferedJob").addValueEventListener(new ValueEventListener() {
             @Override
@@ -69,22 +66,18 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
 
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
                     ClientOfferedJob clientOfferedJob = snapshot.getValue(ClientOfferedJob.class);
-                    if (clientOfferedJob.getClientId().equals(currentUser.getUid())){
-
-                        clientOfferedJobs.add(clientOfferedJob);
-                        Log.e("onDataChange: ", String.valueOf(clientOfferedJob.getStartAndEndLatLon()));
-
-                    }
+                    clientOfferedJobs.add(clientOfferedJob);
+                    Log.e("onDataChange: ", String.valueOf(clientOfferedJob.getStartAndEndLatLon()));
                 }
 
                 Collections.reverse(clientOfferedJobs);
-                clientOfferedJobAdapter = new ClientOfferedJobAdapter(clientOfferedJobs,ClientOfferedJobActivity.this);
-                clientOfferedJobRV.setAdapter(clientOfferedJobAdapter);
+                clientOfferedJobAdapter = new ClientOfferedJobAdapter(clientOfferedJobs,JobPortalActivity.this);
+                jobPortalRV.setAdapter(clientOfferedJobAdapter);
 
                 clientOfferedJobAdapter.setOnLocationClickListener(new ClientOfferedJobAdapter.OnLocationIconClickListener() {
                     @Override
                     public void onLocationClick(String location) {
-                        Toast.makeText(ClientOfferedJobActivity.this, location, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(JobPortalActivity.this, location, Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -93,15 +86,6 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.e("onCancelled: ",databaseError.getMessage());
-            }
-        });
-
-        refreshCojSRL.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Intent refresh = new Intent(ClientOfferedJobActivity.this,ClientOfferedJobActivity.class);
-                refresh.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(refresh);
             }
         });
 
@@ -123,14 +107,14 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
         switch (id){
 
             case android.R.id.home:
-                Intent goHome = new Intent(ClientOfferedJobActivity.this,MainActivity.class);
-                goHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(goHome);
+                Intent intent = new Intent(JobPortalActivity.this,MainActivity.class);
+                startActivity(intent);
                 break;
 
         }
 
         return super.onOptionsItemSelected(item);
+
     }
 
 }

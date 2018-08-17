@@ -138,9 +138,9 @@
     <LinearLayout
         android:paddingRight="10dp"
         android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:gravity="center_vertical"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
+        android:gravity="center_vertical|center_horizontal"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -154,23 +154,49 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <ImageView
-            android:id="@+id/edit_job_iv"
+        <TextView
+            android:visibility="gone"
+            android:elevation="3dp"
+            android:textSize="13dp"
+            android:paddingBottom="3dp"
+            android:paddingTop="3dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:fontFamily="sans-serif"
+            android:id="@+id/apply_job_tv"
             android:layout_marginRight="10dp"
-            android:padding="5dp"
-            android:background="@drawable/send_icon_bg"
-            android:src="@drawable/edit_icon"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bot_query_bg"
+            android:text="Apply "
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <ImageView
-            android:layout_marginRight="10dp"
-            android:id="@+id/delete_job_iv"
-            android:padding="5dp"
-            android:src="@drawable/delete_icon"
-            android:background="@drawable/send_icon_bg"
+        <LinearLayout
+            android:id="@+id/edit_delete_job_ll"
+            android:visibility="gone"
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/edit_job_iv"
+                android:layout_marginRight="10dp"
+                android:padding="5dp"
+                android:background="@drawable/send_icon_bg"
+                android:src="@drawable/edit_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:layout_marginRight="10dp"
+                android:id="@+id/delete_job_iv"
+                android:padding="5dp"
+                android:src="@drawable/delete_icon"
+                android:background="@drawable/send_icon_bg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/start_end_pos_iv"

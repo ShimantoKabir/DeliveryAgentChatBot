@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
+    private int clientOrDeliverMan = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -181,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
 
                 extraUserQuery = new ExtraUserQuery(false,"nothing");
 
-                int clientOrDeliverMan = getIntent().getExtras().getInt("clientOrDeliveryMan");
+                clientOrDeliverMan = getIntent().getExtras().getInt("clientOrDeliveryMan");
 
                 String startLat = getIntent().getExtras().getString("startLat");
                 String startLon = getIntent().getExtras().getString("startLon");
@@ -214,6 +216,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.e("onCreate: ", String.valueOf(clientOrDeliverMan));
 
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            if (clientOrDeliverMan != 0){
+
                 if (clientOrDeliverMan==1){
                     // delivery man block ....
                     databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
@@ -222,8 +231,6 @@ public class MainActivity extends AppCompatActivity {
                     databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
                 }
 
-            }catch (Exception e){
-                e.printStackTrace();
             }
 
             sendIV.setOnClickListener(new View.OnClickListener() {
@@ -286,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
                 extraUserQuery = new ExtraUserQuery(false,"nothing");
 
                 switch (botResponse) {
+
                     case "ProductDetailsSure":
 
                         botResponse = "Do you want to give us your product details?";
@@ -336,6 +344,7 @@ public class MainActivity extends AppCompatActivity {
                         showBotResponse(botResponse);
 
                         break;
+
                     case "startAndEndLocation":
 
                         Intent intent = new Intent(MainActivity.this, GoogleMapActivity.class);
@@ -353,11 +362,13 @@ public class MainActivity extends AppCompatActivity {
 
                     case "showAvailableJobForDeliveryMan":
 
-
-                        botResponse = "Now i going to redirect you to job portal";
-                        showBotResponse(botResponse);
-
                         checkDeliveryManOrNot();
+
+                        break;
+
+                    case "showClientOfferedJob":
+
+                        checkClientOrNot();
 
                         break;
 
@@ -377,9 +388,45 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void checkClientOrNot() {
+
+        databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    showBotResponse("Now i am going to show you the job that offered by me");
+                    Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
+                    startActivity(intent);
+                }else {
+                    showBotResponse("SORRY : Sim/Mam you currently you are not a client !");
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("onCancelled: ",databaseError.getMessage());
+            }
+        });
+
+    }
+
     private void checkDeliveryManOrNot() {
 
-
+        databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    showBotResponse("Now i am going to redirect you to job portal");
+                    Intent intent = new Intent(MainActivity.this,JobPortalActivity.class);
+                    startActivity(intent);
+                }else {
+                    showBotResponse("SORRY : Sim/Mam you currently you are not a delivery man !");
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("onCancelled: ",databaseError.getMessage());
+            }
+        });
 
     }
 
@@ -486,6 +533,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch (id){
+
 
             case R.id.client_offered_job:
                 Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);

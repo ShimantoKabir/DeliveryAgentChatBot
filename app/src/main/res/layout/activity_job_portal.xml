@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.maask.deliveryagentchatbot.ClientOfferedJobActivity">
+    tools:context=".JobPortalActivity">
 
     <android.support.v7.widget.Toolbar
         android:elevation="5dp"
@@ -18,13 +18,13 @@
         app:theme="@style/ToolbarColoredBackArrow"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/refresh_coj_srl"
+        android:id="@+id/refresh_job_portal_srl"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:background="#e7e7e7"
-            android:id="@+id/client_offered_job_rv"
+            android:id="@+id/job_portal_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
