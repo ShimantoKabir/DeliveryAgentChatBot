@@ -89,11 +89,14 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseUser currentUser;
 
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        progressDialog = new ProgressDialog(this);
 
         sendIV = findViewById(R.id.send_iv);
         userQueryET = findViewById(R.id.user_query_et);
@@ -136,6 +139,10 @@ public class MainActivity extends AppCompatActivity {
             auth = FirebaseAuth.getInstance();
             currentUser = auth.getCurrentUser();
 
+            progressDialog.setMessage("Please wait, getting old conversation ...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
             try {
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -144,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
                 databaseReference.child("conversation").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        conversationList.clear();
 
                         for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
 
@@ -157,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                         conversationAdapter.instantDataChang(conversationList);
                         conversationRV.setAdapter(conversationAdapter);
                         conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
+                        progressDialog.dismiss();
 
                     }
 
@@ -171,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
                 extraUserQuery = new ExtraUserQuery(false,"nothing");
 
-                String clientOrDeliverMan = getIntent().getExtras().getString("clientOrDeliveryMan");
+                int clientOrDeliverMan = getIntent().getExtras().getInt("clientOrDeliveryMan");
 
                 String startLat = getIntent().getExtras().getString("startLat");
                 String startLon = getIntent().getExtras().getString("startLon");
@@ -202,14 +212,14 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-                Log.e("onCreate: ",clientOrDeliverMan);
+                Log.e("onCreate: ", String.valueOf(clientOrDeliverMan));
 
-                if (clientOrDeliverMan.equals("2131230780")){
+                if (clientOrDeliverMan==1){
                     // delivery man block ....
-                    databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
+                    databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
                 }else {
                     // client block ...
-                    databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
+                    databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
                 }
 
             }catch (Exception e){
@@ -341,6 +351,16 @@ public class MainActivity extends AppCompatActivity {
 
                         break;
 
+                    case "showAvailableJobForDeliveryMan":
+
+
+                        botResponse = "Now i going to redirect you to job portal";
+                        showBotResponse(botResponse);
+
+                        checkDeliveryManOrNot();
+
+                        break;
+
                     default:
                         showBotResponse(botResponse);
                         break;
@@ -357,16 +377,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void checkDeliveryManOrNot() {
+
+
+
+    }
+
     private void showBotResponse(String botResponse) {
 
         Conversation conversation = new Conversation("bot",botResponse);
         databaseReference.child("conversation").child(currentUser.getUid()).push().setValue(conversation);
-
-//        conversationList.add(conversation);
-//        conversationAdapter = new ConversationAdapter(conversationList,MainActivity.this);
-//        conversationAdapter.instantDataChang(conversationList);
-//        conversationRV.setAdapter(conversationAdapter);
-//        conversationRV.scrollToPosition(conversationAdapter.getItemCount() - 1);
 
     }
 

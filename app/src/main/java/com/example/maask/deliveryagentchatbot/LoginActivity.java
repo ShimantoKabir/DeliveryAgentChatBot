@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,7 +33,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 public class LoginActivity extends AppCompatActivity {
 
     private RadioGroup clientDeliveryRG;
-    private RadioButton clientRB,deliveryManRB;
 
     private SignInButton googleLoginBT;
     private static final String TAG = "Google login fail - ";
@@ -61,8 +61,6 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         googleLoginBT = findViewById(R.id.google_login);
         clientDeliveryRG = findViewById(R.id.client_delivery_rg);
-        clientRB = findViewById(R.id.client_rb);
-        deliveryManRB = findViewById(R.id.delivery_man_rb);
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -80,8 +78,13 @@ public class LoginActivity extends AppCompatActivity {
 
         clientDeliveryRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                clientOrDeliveryMan = i;
+            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int checkedId) {
+                RadioButton radioButton = findViewById(checkedId);
+                if (radioButton.getText().toString().equals("Client")){
+                    clientOrDeliveryMan = 1;
+                }else {
+                    clientOrDeliveryMan = 2;
+                }
                 Log.e("onCheckedChanged: ",String.valueOf(clientOrDeliveryMan));
             }
         });
@@ -89,9 +92,13 @@ public class LoginActivity extends AppCompatActivity {
         googleLoginBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressDialog.setMessage("Sign in with google ... ");
-                progressDialog.show();
-                googleSignIn();
+                if (clientOrDeliveryMan == 0){
+                    Toast.makeText(LoginActivity.this, "WARNING : Please select are you delivery man or client !", Toast.LENGTH_SHORT).show();
+                }else {
+                    progressDialog.setMessage("Sign in with google ... ");
+                    progressDialog.show();
+                    googleSignIn();
+                }
             }
         });
 
@@ -137,7 +144,7 @@ public class LoginActivity extends AppCompatActivity {
                     editor.commit();
 
                     Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                    intent.putExtra("clientOrDeliveryMan",String.valueOf(clientOrDeliveryMan));
+                    intent.putExtra("clientOrDeliveryMan",clientOrDeliveryMan);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
 
