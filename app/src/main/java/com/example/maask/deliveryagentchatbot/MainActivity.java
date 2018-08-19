@@ -54,6 +54,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
+    // hi
+
     private static final String PREFERENCES_KEY  = "freede_preferences";
     private static final String VISIT_LOGIN      = "visit_login";
 
