@@ -44,10 +44,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
 
-    private static final String PREFERENCES_KEY  = "freede_preferences";
-    private static final String VISIT_LOGIN      = "visit_login";
+    private static final String PREFERENCES_KEY        = "freede_preferences";
+    private static final String VISIT_LOGIN            = "visit_login";
+    private static final String CLIENT_OR_DELIVERY_MAN = "client_or_delivery_man";
 
-    SharedPreferences sharedPreferences;
+    private SharedPreferences sharedPreferences;
 
     public int clientOrDeliveryMan = 0;
 
@@ -84,8 +85,15 @@ public class LoginActivity extends AppCompatActivity {
                 RadioButton radioButton = findViewById(checkedId);
                 if (radioButton.getText().toString().equals("Client")){
                     clientOrDeliveryMan = 1;
+                    progressDialog.dismiss();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(CLIENT_OR_DELIVERY_MAN, "client");
+                    editor.apply();
                 }else {
                     clientOrDeliveryMan = 2;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(CLIENT_OR_DELIVERY_MAN, "delivery_man");
+                    editor.apply();
                 }
                 Log.e("onCheckedChanged: ",String.valueOf(clientOrDeliveryMan));
             }
@@ -149,7 +157,7 @@ public class LoginActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString(VISIT_LOGIN, "Y");
-                    editor.commit();
+                    editor.apply();
 
                     Intent intent = new Intent(LoginActivity.this,MainActivity.class);
                     intent.putExtra("clientOrDeliveryMan",clientOrDeliveryMan);

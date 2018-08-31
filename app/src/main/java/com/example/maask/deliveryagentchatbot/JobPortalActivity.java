@@ -81,6 +81,13 @@ public class JobPortalActivity extends AppCompatActivity {
                     }
                 });
 
+                clientOfferedJobAdapter.setOnApplyClickListener(new ClientOfferedJobAdapter.OnApplyClickListener() {
+                    @Override
+                    public void onApplyClick(String clientId) {
+                        sendJobRequestToClient(clientId);
+                    }
+                });
+
             }
 
             @Override
@@ -88,6 +95,15 @@ public class JobPortalActivity extends AppCompatActivity {
                 Log.e("onCancelled: ",databaseError.getMessage());
             }
         });
+
+    }
+
+    private void sendJobRequestToClient(String clientId) {
+
+        databaseReference.child("jobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
+        databaseReference.child("jobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec");
+
+        Toast.makeText(this, "Success : Request has been sent !", Toast.LENGTH_SHORT).show();
 
     }
 

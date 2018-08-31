@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.example.maask.deliveryagentchatbot.Adapter.ClientOfferedJobAdapter;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
 import com.google.firebase.auth.FirebaseAuth;
@@ -131,6 +130,7 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+
     }
 
 }

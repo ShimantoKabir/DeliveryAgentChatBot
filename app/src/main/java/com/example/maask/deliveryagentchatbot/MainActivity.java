@@ -54,8 +54,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFERENCES_KEY  = "freede_preferences";
-    private static final String VISIT_LOGIN      = "visit_login";
+    private static final String PREFERENCES_KEY        = "freede_preferences";
+    private static final String VISIT_LOGIN            = "visit_login";
+    private static final String CLIENT_OR_DELIVERY_MAN = "client_or_delivery_man";
 
     SharedPreferences sharedPreferences;
 
@@ -98,7 +99,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sharedPreferences = getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
         progressDialog = new ProgressDialog(this);
+
+        Log.e("onCreate C OR D: ",sharedPreferences.getString(CLIENT_OR_DELIVERY_MAN,""));
 
         sendIV = findViewById(R.id.send_iv);
         userQueryET = findViewById(R.id.user_query_et);
@@ -115,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
         yesNo = new ArrayList<>();
         yesNo.add("Yes");
         yesNo.add("No");
@@ -128,8 +133,6 @@ public class MainActivity extends AppCompatActivity {
         Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         conversationService = retrofit.create(ConversationService.class);
-
-        sharedPreferences = getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
 
         if (!sharedPreferences.getString(VISIT_LOGIN, "").equals("Y")) {
 
@@ -522,8 +525,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.toolbar_menu,menu);
-        return true;
+        if (sharedPreferences.getString(CLIENT_OR_DELIVERY_MAN,"").equals("client")){
+            getMenuInflater().inflate(R.menu.toolbar_menu,menu);
+            return true;
+        }else {
+            getMenuInflater().inflate(R.menu.delivery_man_toolbar_menu,menu);
+            return true;
+        }
 
     }
 
@@ -534,10 +542,14 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id){
 
-
             case R.id.client_offered_job:
-                Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
-                startActivity(intent);
+                Intent intentClientOfferedJobActivity = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
+                startActivity(intentClientOfferedJobActivity);
+                break;
+
+            case R.id.show_available_job:
+                Intent intentJobPortalActivity = new Intent(MainActivity.this,JobPortalActivity.class);
+                startActivity(intentJobPortalActivity);
                 break;
 
         }

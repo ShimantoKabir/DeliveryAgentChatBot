@@ -22,16 +22,7 @@ import java.util.ArrayList;
 public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private OnLocationIconClickListener locationIconClickListener;
-    private OnDeleteIconClickListener deleteIconClickListener;
-
-    // delete interface
-    public interface OnDeleteIconClickListener{
-        void onDeleteClick(String parentId);
-    }
-
-    public void setOnDeleteIconClickListener(OnDeleteIconClickListener onDeleteIconClickListener){
-        deleteIconClickListener = onDeleteIconClickListener;
-    }
+    private OnApplyClickListener applyClickListener;
 
     // location interface
     public interface OnLocationIconClickListener{
@@ -40,6 +31,15 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public void setOnLocationClickListener(OnLocationIconClickListener onLocationIconClickListener){
         locationIconClickListener = onLocationIconClickListener;
+    }
+
+    // apply interface
+    public interface OnApplyClickListener{
+        void onApplyClick(String clientId);
+    }
+
+    public void setOnApplyClickListener(OnApplyClickListener onApplyClickListener){
+        applyClickListener = onApplyClickListener;
     }
 
     private ArrayList<ClientOfferedJob> clientOfferedJobs;
@@ -119,13 +119,13 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
                 }
             });
 
-            deleteJobIV.setOnClickListener(new View.OnClickListener() {
+            appliyJobTV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (deleteIconClickListener != null){
+                    if (applyClickListener != null){
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION){
-                            deleteIconClickListener.onDeleteClick(clientOfferedJobs.get(position).getStartAndEndLatLon());
+                            applyClickListener.onApplyClick(clientOfferedJobs.get(position).getClientId());
                         }
                     }
                 }
