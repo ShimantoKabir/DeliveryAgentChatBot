@@ -19,18 +19,17 @@
             android:value="@string/google_map_api" />
 
         <activity android:name=".MainActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".GoogleMapActivity" />
         <activity android:name=".ClientOfferedJobActivity" />
-        <activity android:name=".JobPortalActivity"></activity>
+        <activity android:name=".JobPortalActivity" />
+        <activity android:name=".JobRequestActivity"></activity>
     </application>
 
 </manifest>

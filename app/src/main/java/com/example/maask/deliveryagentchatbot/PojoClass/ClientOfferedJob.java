@@ -7,6 +7,7 @@ package com.example.maask.deliveryagentchatbot.PojoClass;
 public class ClientOfferedJob {
 
     private String clientId;
+    private String parentKey;
     private String delivered;
     private String productAttributes;
     private String productDescription;
@@ -17,8 +18,17 @@ public class ClientOfferedJob {
 
     public ClientOfferedJob() {}
 
+    public String getParentKey() {
+        return parentKey;
+    }
+
+    public void setParentKey(String parentKey) {
+        this.parentKey = parentKey;
+    }
+
     public String getClientId() {
         return clientId;
+
     }
 
     public void setClientId(String clientId) {

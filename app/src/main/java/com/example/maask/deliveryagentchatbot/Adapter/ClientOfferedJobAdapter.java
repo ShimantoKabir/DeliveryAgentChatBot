@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,7 +36,7 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     // apply interface
     public interface OnApplyClickListener{
-        void onApplyClick(String clientId);
+        void onApplyClick(String parentKey);
     }
 
     public void setOnApplyClickListener(OnApplyClickListener onApplyClickListener){
@@ -72,9 +73,11 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
         clientOfferedJobViewHolder.publishDate.setText("Publish Data : "+clientOfferedJobs.get(position).getPublishData());
 
         if (context instanceof ClientOfferedJobActivity){
+            clientOfferedJobViewHolder.applyJobBT.setVisibility(View.GONE);
             clientOfferedJobViewHolder.editDeleteJobLL.setVisibility(View.VISIBLE);
         }else {
-            clientOfferedJobViewHolder.appliyJobTV.setVisibility(View.VISIBLE);
+            clientOfferedJobViewHolder.applyJobBT.setVisibility(View.VISIBLE);
+            clientOfferedJobViewHolder.editDeleteJobLL.setVisibility(View.GONE);
         }
 
     }
@@ -86,8 +89,9 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private class ClientOfferedJobViewHolder extends RecyclerView.ViewHolder {
 
-        TextView productDescription,productAttribute,productWeight,deliveryStatus,productType,publishDate,appliyJobTV;
+        TextView productDescription,productAttribute,productWeight,deliveryStatus,productType,publishDate;
         ImageView editJobIV,deleteJobIV,startEndPosIV;
+        Button applyJobBT;
 
         LinearLayout editDeleteJobLL;
 
@@ -105,7 +109,7 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
             deleteJobIV = v.findViewById(R.id.delete_job_iv);
             startEndPosIV = v.findViewById(R.id.start_end_pos_iv);
             editDeleteJobLL = v.findViewById(R.id.edit_delete_job_ll);
-            appliyJobTV = v.findViewById(R.id.apply_job_tv);
+            applyJobBT = v.findViewById(R.id.apply_job_bt);
 
             startEndPosIV.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -119,13 +123,16 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
                 }
             });
 
-            appliyJobTV.setOnClickListener(new View.OnClickListener() {
+            applyJobBT.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
                     if (applyClickListener != null){
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION){
-                            applyClickListener.onApplyClick(clientOfferedJobs.get(position).getClientId());
+
+                            applyClickListener.onApplyClick(clientOfferedJobs.get(position).getParentKey());
+
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 package com.example.maask.deliveryagentchatbot;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,6 +35,7 @@ public class JobPortalActivity extends AppCompatActivity {
     private ClientOfferedJobAdapter clientOfferedJobAdapter;
 
     private RecyclerView jobPortalRV;
+    private SwipeRefreshLayout refreshJobPortalSRL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +44,13 @@ public class JobPortalActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.custom_toolbar);
         jobPortalRV = findViewById(R.id.job_portal_rv);
+        refreshJobPortalSRL = findViewById(R.id.refresh_job_portal_srl);
 
         toolbar = findViewById(R.id.custom_toolbar);
         toolbar.setTitle("Job Portal");
         toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
 
         LinearLayoutManager lm = new LinearLayoutManager(this);
         lm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -67,7 +69,7 @@ public class JobPortalActivity extends AppCompatActivity {
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
                     ClientOfferedJob clientOfferedJob = snapshot.getValue(ClientOfferedJob.class);
                     clientOfferedJobs.add(clientOfferedJob);
-                    Log.e("onDataChange: ", String.valueOf(clientOfferedJob.getStartAndEndLatLon()));
+                    Log.e("key: ",snapshot.getKey());
                 }
 
                 Collections.reverse(clientOfferedJobs);
@@ -96,21 +98,30 @@ public class JobPortalActivity extends AppCompatActivity {
             }
         });
 
+        refreshJobPortalSRL.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Intent refresh = new Intent(JobPortalActivity.this,JobPortalActivity.class);
+                refresh.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(refresh);
+            }
+        });
+
     }
 
     private void sendJobRequestToClient(String clientId) {
 
-        databaseReference.child("jobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
-        databaseReference.child("jobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec");
+//        databaseReference.child("jobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
+//        databaseReference.child("jobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec");
 
-        Toast.makeText(this, "Success : Request has been sent !", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,clientId, Toast.LENGTH_SHORT).show();
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.toolbar_menu,menu);
+        getMenuInflater().inflate(R.menu.client_toolbar_menu,menu);
         return true;
 
     }

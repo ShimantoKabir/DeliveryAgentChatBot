@@ -84,14 +84,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (radioButton.getText().toString().equals("Client")){
                     clientOrDeliveryMan = 1;
                     progressDialog.dismiss();
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(CLIENT_OR_DELIVERY_MAN, "client");
-                    editor.apply();
                 }else {
                     clientOrDeliveryMan = 2;
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(CLIENT_OR_DELIVERY_MAN, "delivery_man");
-                    editor.apply();
+                    progressDialog.dismiss();
                 }
                 Log.e("onCheckedChanged: ",String.valueOf(clientOrDeliveryMan));
             }
@@ -155,10 +150,10 @@ public class LoginActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString(VISIT_LOGIN, "Y");
+                    editor.putInt(CLIENT_OR_DELIVERY_MAN, clientOrDeliveryMan);
                     editor.apply();
 
                     Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                    intent.putExtra("clientOrDeliveryMan",clientOrDeliveryMan);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
 

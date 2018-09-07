@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,12 +41,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,8 +51,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFERENCES_KEY  = "freede_preferences";
-    private static final String VISIT_LOGIN      = "visit_login";
+    private static final String PREFERENCES_KEY        = "freede_preferences";
+    private static final String VISIT_LOGIN            = "visit_login";
+    private static final String CLIENT_OR_DELIVERY_MAN = "client_or_delivery_man";
 
     SharedPreferences sharedPreferences;
 
@@ -142,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
 
             auth = FirebaseAuth.getInstance();
             currentUser = auth.getCurrentUser();
-
-            progressDialog.setMessage("Please wait, getting old conversation ...");
+            progressDialog.setTitle("Getting old Conversation");
+            progressDialog.setMessage("Please wait .... ");
             progressDialog.setCancelable(false);
             progressDialog.show();
 
@@ -185,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
                 extraUserQuery = new ExtraUserQuery(false,"nothing");
 
-                clientOrDeliverMan = getIntent().getExtras().getInt("clientOrDeliveryMan");
+                clientOrDeliverMan = sharedPreferences.getInt(CLIENT_OR_DELIVERY_MAN,0);
 
                 String startLat = getIntent().getExtras().getString("startLat");
                 String startLon = getIntent().getExtras().getString("startLon");
@@ -211,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
 
                     session.resetSessionId(sessionId);
                     botResponseLoader.setVisibility(View.VISIBLE);
+                    sendIV.setVisibility(View.GONE);
                     String startAndEndPosition = startLat+"/"+startLon+"/"+endLat+"/"+endLon;
                     getBotResponse(startAndEndPosition);
 
@@ -524,8 +521,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.toolbar_menu,menu);
-        return true;
+        int cod = sharedPreferences.getInt(CLIENT_OR_DELIVERY_MAN,0);
+
+        if (cod == 1){
+            getMenuInflater().inflate(R.menu.client_toolbar_menu,menu);
+            return true;
+        }else {
+            getMenuInflater().inflate(R.menu.delivery_man_toolbar_menu,menu);
+            return true;
+        }
 
     }
 
@@ -538,14 +542,17 @@ public class MainActivity extends AppCompatActivity {
         switch (id){
 
             case R.id.client_offered_job:
-                Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
-                startActivity(intent);
+                Intent goClientOfferedJobActivity = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
+                startActivity(goClientOfferedJobActivity);
+                break;
+
+            case R.id.show_available_job:
+                Intent goJobPortalActivity = new Intent(MainActivity.this,JobPortalActivity.class);
+                startActivity(goJobPortalActivity);
                 break;
 
             case R.id.logout:
-
                 ((ActivityManager)this.getSystemService(ACTIVITY_SERVICE)).clearApplicationUserData();
-
                 break;
 
         }
@@ -553,6 +560,5 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
 
     }
-
 
 }

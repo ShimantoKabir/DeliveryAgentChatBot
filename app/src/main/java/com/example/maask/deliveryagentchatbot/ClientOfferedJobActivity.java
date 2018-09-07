@@ -67,11 +67,13 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
                 clientOfferedJobs.clear();
 
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+
                     ClientOfferedJob clientOfferedJob = snapshot.getValue(ClientOfferedJob.class);
+
                     if (clientOfferedJob.getClientId().equals(currentUser.getUid())){
 
                         clientOfferedJobs.add(clientOfferedJob);
-                        Log.e("onDataChange: ", String.valueOf(clientOfferedJob.getStartAndEndLatLon()));
+                        // Log.e("onDataChange: ", String.valueOf(clientOfferedJob.getStartAndEndLatLon()));
 
                     }
                 }
@@ -109,7 +111,7 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.toolbar_menu,menu);
+        getMenuInflater().inflate(R.menu.client_toolbar_menu,menu);
         return true;
 
     }
