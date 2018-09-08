@@ -12,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.example.maask.deliveryagentchatbot.Adapter.ClientOfferedJobAdapter;
+import com.example.maask.deliveryagentchatbot.PojoClass.AppliedDeliveryManInfo;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
+import com.example.maask.deliveryagentchatbot.PojoClass.ManageJob;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -66,14 +68,15 @@ public class JobPortalActivity extends AppCompatActivity {
 
                 clientOfferedJobs.clear();
 
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    ClientOfferedJob clientOfferedJob = snapshot.getValue(ClientOfferedJob.class);
+                for (DataSnapshot cojSnapShot : dataSnapshot.getChildren()) {
+                    ClientOfferedJob clientOfferedJob = cojSnapShot.getValue(ClientOfferedJob.class);
                     clientOfferedJobs.add(clientOfferedJob);
-                    Log.e("key: ",snapshot.getKey());
+                    Log.e("clientOfferedJob: ",cojSnapShot.toString());
                 }
 
                 Collections.reverse(clientOfferedJobs);
                 clientOfferedJobAdapter = new ClientOfferedJobAdapter(clientOfferedJobs,JobPortalActivity.this);
+
                 jobPortalRV.setAdapter(clientOfferedJobAdapter);
 
                 clientOfferedJobAdapter.setOnLocationClickListener(new ClientOfferedJobAdapter.OnLocationIconClickListener() {
@@ -85,8 +88,8 @@ public class JobPortalActivity extends AppCompatActivity {
 
                 clientOfferedJobAdapter.setOnApplyClickListener(new ClientOfferedJobAdapter.OnApplyClickListener() {
                     @Override
-                    public void onApplyClick(String clientId) {
-                        sendJobRequestToClient(clientId);
+                    public void onApplyClick(ManageJob manageJob) {
+                        sendJobRequestToClient(manageJob);
                     }
                 });
 
@@ -109,12 +112,12 @@ public class JobPortalActivity extends AppCompatActivity {
 
     }
 
-    private void sendJobRequestToClient(String clientId) {
+    private void sendJobRequestToClient(ManageJob manageJob) {
 
-//        databaseReference.child("jobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
-//        databaseReference.child("jobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec");
 
-        Toast.makeText(this,clientId, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(JobPortalActivity.this,JobRequestActivity.class);
+        intent.putExtra("manageJob",manageJob);
+        startActivity(intent);
 
     }
 

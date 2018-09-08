@@ -10,10 +10,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.example.maask.deliveryagentchatbot.ClientOfferedJobActivity;
+import com.example.maask.deliveryagentchatbot.PojoClass.AppliedDeliveryManInfo;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
+import com.example.maask.deliveryagentchatbot.PojoClass.ManageJob;
 import com.example.maask.deliveryagentchatbot.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 
 /**
@@ -21,6 +30,10 @@ import java.util.ArrayList;
  */
 
 public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    // database credential ...
+
+
 
     private OnLocationIconClickListener locationIconClickListener;
     private OnApplyClickListener applyClickListener;
@@ -36,7 +49,7 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     // apply interface
     public interface OnApplyClickListener{
-        void onApplyClick(String parentKey);
+        void onApplyClick(ManageJob manageJob);
     }
 
     public void setOnApplyClickListener(OnApplyClickListener onApplyClickListener){
@@ -63,21 +76,47 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
-        ClientOfferedJobViewHolder clientOfferedJobViewHolder = (ClientOfferedJobViewHolder) holder;
+        final ClientOfferedJobViewHolder clientOfferedJobViewHolder = (ClientOfferedJobViewHolder) holder;
 
         clientOfferedJobViewHolder.deliveryStatus.setText("Delivered : "+clientOfferedJobs.get(position).getDelivered());
         clientOfferedJobViewHolder.productDescription.setText("Description : "+clientOfferedJobs.get(position).getProductDescription());
         clientOfferedJobViewHolder.productAttribute.setText("Attribute : "+clientOfferedJobs.get(position).getProductAttributes());
         clientOfferedJobViewHolder.productType.setText("Type : "+clientOfferedJobs.get(position).getProductType());
         clientOfferedJobViewHolder.productWeight.setText("Weight : "+String.valueOf(clientOfferedJobs.get(position).getUnitWeight()));
-        clientOfferedJobViewHolder.publishDate.setText("Publish Data : "+clientOfferedJobs.get(position).getPublishData());
+        clientOfferedJobViewHolder.publishDate.setText("Publish Date : "+clientOfferedJobs.get(position).getPublishData());
 
         if (context instanceof ClientOfferedJobActivity){
             clientOfferedJobViewHolder.applyJobBT.setVisibility(View.GONE);
             clientOfferedJobViewHolder.editDeleteJobLL.setVisibility(View.VISIBLE);
         }else {
+
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            final FirebaseUser currentUser = auth.getCurrentUser();
+
+            databaseReference.child("clientOfferedJob").child(clientOfferedJobs.get(position).getParentKey()).child("AppliedDeliveryManInfo").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot admSnapShot : dataSnapshot.getChildren()) {
+
+                        AppliedDeliveryManInfo appliedDeliveryManInfo = admSnapShot.getValue(AppliedDeliveryManInfo.class);
+                        if (appliedDeliveryManInfo.getDeliveryManId().equals(currentUser.getUid())){
+                            Log.e("appDeliveryManInfo: ",appliedDeliveryManInfo.getDeliveryManId());
+                            clientOfferedJobViewHolder.applyJobBT.setText("Decline");
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
             clientOfferedJobViewHolder.applyJobBT.setVisibility(View.VISIBLE);
             clientOfferedJobViewHolder.editDeleteJobLL.setVisibility(View.GONE);
+
         }
 
     }
@@ -131,7 +170,8 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION){
 
-                            applyClickListener.onApplyClick(clientOfferedJobs.get(position).getParentKey());
+                            ManageJob manageJob  = new ManageJob(clientOfferedJobs.get(position).getParentKey(),applyJobBT.getText().toString());
+                            applyClickListener.onApplyClick(manageJob);
 
                         }
                     }

@@ -1,11 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="#e2e2e2"
     tools:context=".JobRequestActivity">
 
-</LinearLayout>
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:id="@+id/custom_toolbar"
+        android:background="@android:color/white"
+        app:popupTheme="@style/AppTheme"
+        app:theme="@style/ToolbarColoredBackArrow"/>
+
+    <LinearLayout
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:background="#ddd"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/job_notification_ll"
+            android:layout_margin="5dp"
+            android:elevation="2dp"
+            android:background="#e7e7e7"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:src="@drawable/info_icon"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/job_notification_tv"
+                android:background="#ddefefef"
+                android:padding="10dp"
+                android:layout_gravity="center"
+                android:layout_weight="5"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="italic"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Write a cover letter and send to to client ..."
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <EditText
+            android:textStyle="normal"
+            android:fontFamily="sans-serif-condensed"
+            android:id="@+id/cover_letter_et"
+            android:gravity="start"
+            android:padding="5dp"
+            android:elevation="2dp"
+            android:layout_margin="5dp"
+            android:background="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/apply_job_bt"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:textAllCaps="false"
+        android:textColor="@color/colorPrimary"
+        android:text="Apply"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp" />
+
+</RelativeLayout>

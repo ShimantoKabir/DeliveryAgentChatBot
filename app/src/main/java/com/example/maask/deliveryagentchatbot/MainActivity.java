@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 databaseReference = FirebaseDatabase.getInstance().getReference();
                 databaseReference.keepSynced(true);
 
-                databaseReference.child("conversation").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("userBotConversation").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
     private void showUserQuery(String userQuery) {
 
         Conversation conversation = new Conversation("user",userQuery);
-        databaseReference.child("conversation").child(currentUser.getUid()).push().setValue(conversation);
+        databaseReference.child("userBotConversation").child(currentUser.getUid()).push().setValue(conversation);
 
         conversationList.add(conversation);
         getBotResponse(userQuery);
@@ -432,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
     private void showBotResponse(String botResponse) {
 
         Conversation conversation = new Conversation("bot",botResponse);
-        databaseReference.child("conversation").child(currentUser.getUid()).push().setValue(conversation);
+        databaseReference.child("userBotConversation").child(currentUser.getUid()).push().setValue(conversation);
 
     }
 

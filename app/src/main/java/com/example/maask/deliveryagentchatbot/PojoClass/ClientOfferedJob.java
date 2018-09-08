@@ -1,5 +1,7 @@
 package com.example.maask.deliveryagentchatbot.PojoClass;
 
+import java.util.ArrayList;
+
 /**
  * Created by Maask on 8/12/2018.
  */
@@ -15,8 +17,17 @@ public class ClientOfferedJob {
     private String publishData;
     private String startAndEndLatLon;
     private Integer unitWeight;
+    private ArrayList<AppliedDeliveryManInfo> appliedDeliveryManInfos = new ArrayList<>();
 
     public ClientOfferedJob() {}
+
+    public ArrayList<AppliedDeliveryManInfo> getAppliedDeliveryManInfos() {
+        return appliedDeliveryManInfos;
+    }
+
+    public void setAppliedDeliveryManInfos(ArrayList<AppliedDeliveryManInfo> appliedDeliveryManInfos) {
+        this.appliedDeliveryManInfos = appliedDeliveryManInfos;
+    }
 
     public String getParentKey() {
         return parentKey;
@@ -28,7 +39,6 @@ public class ClientOfferedJob {
 
     public String getClientId() {
         return clientId;
-
     }
 
     public void setClientId(String clientId) {
