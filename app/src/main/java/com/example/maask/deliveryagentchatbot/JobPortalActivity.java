@@ -12,9 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.example.maask.deliveryagentchatbot.Adapter.ClientOfferedJobAdapter;
-import com.example.maask.deliveryagentchatbot.PojoClass.AppliedDeliveryManInfo;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
-import com.example.maask.deliveryagentchatbot.PojoClass.ManageJob;
+import com.example.maask.deliveryagentchatbot.HelperClass.ManageJob;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -62,7 +61,7 @@ public class JobPortalActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference();
         currentUser = auth.getCurrentUser();
 
-        databaseReference.child("clientOfferedJob").addValueEventListener(new ValueEventListener() {
+        databaseReference.child("ClientOfferedJob").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 

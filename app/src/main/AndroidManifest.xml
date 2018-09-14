@@ -29,7 +29,8 @@
         <activity android:name=".GoogleMapActivity" />
         <activity android:name=".ClientOfferedJobActivity" />
         <activity android:name=".JobPortalActivity" />
-        <activity android:name=".JobRequestActivity"></activity>
+        <activity android:name=".JobRequestActivity" />
+        <activity android:name=".ProfileActivity"></activity>
     </application>
 
 </manifest>

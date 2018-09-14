@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    android:windowSoftInputMode="stateVisible|adjustResize"
+    android:focusableInTouchMode="true"
+    tools:context=".ProfileActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_gravity="center_vertical"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/profile_img_civ"
+                android:layout_width="196dp"
+                android:layout_height="196dp"
+                android:src="@drawable/profile_img"
+                app:civ_border_width="2dp"
+                app:civ_border_color="#dad9d9"/>
+
+            <EditText
+                android:hint="Input Your Name"
+                android:id="@+id/user_name_et"
+                android:fontFamily="sans-serif-condensed"
+                android:textColorHint="@color/colorAccent"
+                android:textColor="@color/colorAccent"
+                android:gravity="center_vertical|center_horizontal"
+                android:paddingLeft="10dp"
+                android:drawableLeft="@drawable/profile_icon"
+                android:layout_marginTop="20dp"
+                android:background="@color/colorPrimaryDark"
+                android:layout_width="300dp"
+                android:layout_height="40dp" />
+
+            <EditText
+                android:inputType="number"
+                android:id="@+id/user_phone_no_et"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/colorAccent"
+                android:textColorHint="@color/colorAccent"
+                android:hint="Input Your Phone Number"
+                android:gravity="center_vertical|center_horizontal"
+                android:paddingLeft="10dp"
+                android:drawableLeft="@drawable/phone_icon"
+                android:layout_marginTop="10dp"
+                android:background="@color/colorPrimaryDark"
+                android:layout_width="300dp"
+                android:layout_height="40dp" />
+
+            <Button
+                android:id="@+id/save_edit_bt"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/colorPrimary"
+                android:text="SAVE"
+                android:layout_marginTop="10dp"
+                android:background="@color/colorAccent"
+                android:layout_width="300dp"
+                android:layout_height="40dp" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

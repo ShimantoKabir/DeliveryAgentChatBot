@@ -40,6 +40,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 databaseReference = FirebaseDatabase.getInstance().getReference();
                 databaseReference.keepSynced(true);
 
-                databaseReference.child("userBotConversation").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("UserBotConversation").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -224,10 +225,15 @@ public class MainActivity extends AppCompatActivity {
 
                 if (clientOrDeliverMan==1){
                     // delivery man block ....
+                    String deviceToken = FirebaseInstanceId.getInstance().getToken();
                     databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
+                    databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("deviceToken").setValue(deviceToken);
+
                 }else {
                     // client block ...
+                    String deviceToken = FirebaseInstanceId.getInstance().getToken();
                     databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
+                    databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("deviceToken").setValue(deviceToken);
                 }
 
             }
@@ -260,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
     private void showUserQuery(String userQuery) {
 
         Conversation conversation = new Conversation("user",userQuery);
-        databaseReference.child("userBotConversation").child(currentUser.getUid()).push().setValue(conversation);
+        databaseReference.child("UserBotConversation").child(currentUser.getUid()).push().setValue(conversation);
 
         conversationList.add(conversation);
         getBotResponse(userQuery);
@@ -371,6 +377,12 @@ public class MainActivity extends AppCompatActivity {
 
                         break;
 
+                    case "showProfile":
+
+                        showProfile();
+
+                        break;
+
                     default:
                         showBotResponse(botResponse);
                         break;
@@ -384,6 +396,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("onFailure: ",t.getMessage());
             }
         });
+
+    }
+
+    private void showProfile() {
+
+        showBotResponse("Now i am going to show your profile");
+        Intent intent = new Intent(MainActivity.this,ProfileActivity.class);
+        startActivity(intent);
 
     }
 
@@ -432,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
     private void showBotResponse(String botResponse) {
 
         Conversation conversation = new Conversation("bot",botResponse);
-        databaseReference.child("userBotConversation").child(currentUser.getUid()).push().setValue(conversation);
+        databaseReference.child("UserBotConversation").child(currentUser.getUid()).push().setValue(conversation);
 
     }
 
@@ -540,6 +560,11 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch (id){
+
+            case R.id.profile:
+                Intent goProfileActivity = new Intent(MainActivity.this,ProfileActivity.class);
+                startActivity(goProfileActivity);
+                break;
 
             case R.id.client_offered_job:
                 Intent goClientOfferedJobActivity = new Intent(MainActivity.this,ClientOfferedJobActivity.class);

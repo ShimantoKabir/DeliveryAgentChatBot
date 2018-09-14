@@ -1,5 +1,7 @@
 package com.example.maask.deliveryagentchatbot;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -10,11 +12,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.maask.deliveryagentchatbot.PojoClass.AppliedDeliveryManInfo;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
-import com.example.maask.deliveryagentchatbot.PojoClass.ManageJob;
+import com.example.maask.deliveryagentchatbot.HelperClass.ManageJob;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +25,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.time.Instant;
 
 public class JobRequestActivity extends AppCompatActivity {
 
@@ -43,9 +48,7 @@ public class JobRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_job_request);
 
-        ManageJob manageJob = (ManageJob) getIntent().getSerializableExtra("manageJob");
-
-        Toast.makeText(this, manageJob.getStatus(), Toast.LENGTH_SHORT).show();
+        final ManageJob manageJob = (ManageJob) getIntent().getSerializableExtra("manageJob");
 
         parentKey = manageJob.getJobId();
 
@@ -61,15 +64,16 @@ public class JobRequestActivity extends AppCompatActivity {
         jobNotificationTV = findViewById(R.id.job_notification_tv);
 
 
-        if (!manageJob.getStatus().equals("Apply ")){
+        if (manageJob.getStatus() != 1){
             jobNotificationTV.setText("You have already applied this job, if you want to decline this job write a massage and decline it");
+            applyJobBT.setText("Decline");
         }
 
         auth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         currentUser = auth.getCurrentUser();
 
-        databaseReference.child("clientOfferedJob").child(parentKey).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("ClientOfferedJob").child(parentKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.e("onDataChange: ",dataSnapshot.toString());
@@ -83,21 +87,65 @@ public class JobRequestActivity extends AppCompatActivity {
                         String coverLetter = coverLetterET.getText().toString();
                         coverLetterET.setText("");
 
+                        Log.e("manageJob: ", String.valueOf(manageJob.getStatus()));
+
                         if (coverLetter.isEmpty()){
                             Toast.makeText(JobRequestActivity.this, "Please, Write a cover letter ...", Toast.LENGTH_SHORT).show();
                         }else {
 
                             Conversation conversation = new Conversation("deliveryMan",coverLetter);
 
-                            AppliedDeliveryManInfo appliedDeliveryManInfo = new AppliedDeliveryManInfo(currentUser.getUid());
-
-                            databaseReference.child("clientOfferedJob").child(parentKey).child("AppliedDeliveryManInfo").push().setValue(appliedDeliveryManInfo);
-
-                            databaseReference.child("JobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
-                            databaseReference.child("JobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec");
-
                             databaseReference.child("ClientDeliveryManConversation").child(currentUser.getUid()).child(clientId).push().setValue(conversation);
                             databaseReference.child("ClientDeliveryManConversation").child(clientId).child(currentUser.getUid()).push().setValue(conversation);
+
+                            if (manageJob.getStatus() == 1) {
+
+                                AppliedDeliveryManInfo appliedDeliveryManId = new AppliedDeliveryManInfo(currentUser.getUid());
+                                databaseReference.child("ClientOfferedJob").child(parentKey).child("AppliedDeliveryManInfo").push().setValue(appliedDeliveryManId);
+
+                                databaseReference.child("JobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
+                                databaseReference.child("JobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Toast.makeText(JobRequestActivity.this, "Request sent successful ... ", Toast.LENGTH_SHORT).show();
+                                        Intent gotJobPortal = new Intent(JobRequestActivity.this,JobPortalActivity.class);
+                                        gotJobPortal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(gotJobPortal);
+                                    }
+                                });
+
+                            }else {
+
+                                databaseReference.child("ClientOfferedJob").child(parentKey).child("AppliedDeliveryManInfo").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                            AppliedDeliveryManInfo appliedDeliveryManInfo = snapshot.getValue(AppliedDeliveryManInfo.class);
+                                            if (appliedDeliveryManInfo.getDeliveryManId().equals(currentUser.getUid())){
+                                                Log.e("jobRequestClickEvent: ",snapshot.getKey());
+                                                databaseReference.child("ClientOfferedJob").child(parentKey).child("AppliedDeliveryManInfo").child(snapshot.getKey()).removeValue();
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        Log.e("onCancelled: ",databaseError.getMessage());
+                                    }
+                                });
+
+                                databaseReference.child("JobRequest").child(currentUser.getUid()).child(clientId).removeValue();
+                                databaseReference.child("JobRequest").child(clientId).child(currentUser.getUid()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Toast.makeText(JobRequestActivity.this, "Request remove successful ... ", Toast.LENGTH_SHORT).show();
+                                        Intent gotJobPortal = new Intent(JobRequestActivity.this,JobPortalActivity.class);
+                                        gotJobPortal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(gotJobPortal);
+                                    }
+                                });
+
+                            }
 
                         }
 

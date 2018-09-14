@@ -1,15 +1,15 @@
-package com.example.maask.deliveryagentchatbot.PojoClass;
+package com.example.maask.deliveryagentchatbot.HelperClass;
 
 import java.io.Serializable;
 
 public class ManageJob implements Serializable {
 
     public String jobId;
-    public String Status;
+    public int Status;
 
     public ManageJob() {}
 
-    public ManageJob(String jobId, String status) {
+    public ManageJob(String jobId, int status) {
         this.jobId = jobId;
         Status = status;
     }
@@ -22,11 +22,11 @@ public class ManageJob implements Serializable {
         this.jobId = jobId;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return Status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         Status = status;
     }
 }

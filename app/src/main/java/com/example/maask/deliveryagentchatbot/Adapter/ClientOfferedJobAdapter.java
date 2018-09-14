@@ -11,9 +11,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.maask.deliveryagentchatbot.ClientOfferedJobActivity;
+import com.example.maask.deliveryagentchatbot.HelperClass.ManageJob;
 import com.example.maask.deliveryagentchatbot.PojoClass.AppliedDeliveryManInfo;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
-import com.example.maask.deliveryagentchatbot.PojoClass.ManageJob;
 import com.example.maask.deliveryagentchatbot.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -94,7 +94,7 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
             final FirebaseUser currentUser = auth.getCurrentUser();
 
-            databaseReference.child("clientOfferedJob").child(clientOfferedJobs.get(position).getParentKey()).child("AppliedDeliveryManInfo").addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("ClientOfferedJob").child(clientOfferedJobs.get(position).getParentKey()).child("AppliedDeliveryManInfo").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot admSnapShot : dataSnapshot.getChildren()) {
@@ -170,7 +170,12 @@ public class ClientOfferedJobAdapter extends RecyclerView.Adapter<RecyclerView.V
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION){
 
-                            ManageJob manageJob  = new ManageJob(clientOfferedJobs.get(position).getParentKey(),applyJobBT.getText().toString());
+                            int status = 0;
+                            if (applyJobBT.getText().toString().equals("Apply ")){
+                                status = 1;
+                            }
+
+                            ManageJob manageJob  = new ManageJob(clientOfferedJobs.get(position).getParentKey(),status);
                             applyClickListener.onApplyClick(manageJob);
 
                         }

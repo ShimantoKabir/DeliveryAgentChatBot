@@ -60,7 +60,7 @@ public class ClientOfferedJobActivity extends AppCompatActivity {
         final FirebaseUser currentUser = auth.getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
-        databaseReference.child("clientOfferedJob").addValueEventListener(new ValueEventListener() {
+        databaseReference.child("ClientOfferedJob").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
