@@ -49,7 +49,6 @@ public class JobPortalActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.custom_toolbar);
         toolbar.setTitle("Job Portal");
-        toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

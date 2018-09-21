@@ -1,6 +1,8 @@
 package com.example.maask.deliveryagentchatbot;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import com.example.maask.deliveryagentchatbot.PojoClass.AppliedDeliveryManInfo;
 import com.example.maask.deliveryagentchatbot.PojoClass.ClientOfferedJob;
 import com.example.maask.deliveryagentchatbot.PojoClass.Conversation;
 import com.example.maask.deliveryagentchatbot.HelperClass.ManageJob;
+import com.example.maask.deliveryagentchatbot.PojoClass.Notification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,8 +28,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.time.Instant;
 
 public class JobRequestActivity extends AppCompatActivity {
 
@@ -43,18 +44,26 @@ public class JobRequestActivity extends AppCompatActivity {
     private String clientId;
     private String parentKey;
 
+    SharedPreferences sharedPreferences;
+    private static final String USER_TYPE = "client_or_delivery_man";
+    private static final String PREFERENCES_KEY        = "freede_preferences";
+
+    private int userType = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_job_request);
+
+        sharedPreferences = getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
+        userType = sharedPreferences.getInt(USER_TYPE,0);
 
         final ManageJob manageJob = (ManageJob) getIntent().getSerializableExtra("manageJob");
 
         parentKey = manageJob.getJobId();
 
         toolbar = findViewById(R.id.custom_toolbar);
-        toolbar.setTitle("Job");
-        toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
+        toolbar.setTitle("Cover letter");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -62,7 +71,6 @@ public class JobRequestActivity extends AppCompatActivity {
         applyJobBT = findViewById(R.id.apply_job_bt);
         jobNotificationLL = findViewById(R.id.job_notification_ll);
         jobNotificationTV = findViewById(R.id.job_notification_tv);
-
 
         if (manageJob.getStatus() != 1){
             jobNotificationTV.setText("You have already applied this job, if you want to decline this job write a massage and decline it");
@@ -104,13 +112,52 @@ public class JobRequestActivity extends AppCompatActivity {
                                 databaseReference.child("ClientOfferedJob").child(parentKey).child("AppliedDeliveryManInfo").push().setValue(appliedDeliveryManId);
 
                                 databaseReference.child("JobRequest").child(currentUser.getUid()).child(clientId).child("requestType").setValue("snt");
-                                databaseReference.child("JobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                databaseReference.child("JobRequest").child(clientId).child(currentUser.getUid()).child("requestType").setValue("rec")
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
+
                                         Toast.makeText(JobRequestActivity.this, "Request sent successful ... ", Toast.LENGTH_SHORT).show();
-                                        Intent gotJobPortal = new Intent(JobRequestActivity.this,JobPortalActivity.class);
-                                        gotJobPortal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(gotJobPortal);
+
+                                        // -------------------- get client device token -------------------- //
+                                        databaseReference.child("UserInfo").child(clientId)
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                                String deviceToken = dataSnapshot.child("deviceToken").getValue().toString();
+
+                                                Log.e("getDeviceToken 1: ",deviceToken);
+
+                                                Notification notification = new Notification(clientId,"jobRequest",deviceToken,"SomeOne");
+
+                                                databaseReference.child("Notification").child(clientId).push().setValue(notification)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()){
+
+                                                            Log.e("isSuccessful 1: ","isSuccessful");
+
+                                                            Toast.makeText(JobRequestActivity.this, "SUCCESS : Data inserted successfully ....", Toast.LENGTH_SHORT).show();
+                                                            Intent gotJobPortal = new Intent(JobRequestActivity.this,JobPortalActivity.class);
+                                                            gotJobPortal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                            startActivity(gotJobPortal);
+
+                                                        }else {
+                                                            Toast.makeText(JobRequestActivity.this, "ERROR : Something wrong .... ", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+                                                Log.e("getDeviceTokenErr: ",databaseError.getMessage());
+                                            }
+                                        });
+
                                     }
                                 });
 

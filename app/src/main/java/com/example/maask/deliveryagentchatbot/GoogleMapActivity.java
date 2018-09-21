@@ -46,7 +46,6 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 
         toolbar = findViewById(R.id.custom_toolbar);
         toolbar.setTitle("Google Map");
-        toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

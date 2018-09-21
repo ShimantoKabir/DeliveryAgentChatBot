@@ -8,8 +8,18 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="ToolbarColoredBackArrow" parent="AppTheme">
+    <style name="ToolbarBgColorWhite" parent="AppTheme">
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
         <item name="android:textColorSecondary">@color/colorPrimary</item>
+        <item name="actionMenuTextColor">@color/colorPrimary</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="ToolbarBgColorPrimary" parent="AppTheme">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="actionMenuTextColor">@color/white</item>
+        <item name="android:background">@color/colorPrimary</item>
     </style>
 
 </resources>

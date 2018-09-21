@@ -44,11 +44,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String PREFERENCES_KEY        = "freede_preferences";
     private static final String VISIT_LOGIN            = "visit_login";
-    private static final String CLIENT_OR_DELIVERY_MAN = "client_or_delivery_man";
+    private static final String USER_TYPE = "client_or_delivery_man";
 
     private SharedPreferences sharedPreferences;
 
-    public int clientOrDeliveryMan = 0;
+    public int userType = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,20 +82,20 @@ public class LoginActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup radioGroup, @IdRes int checkedId) {
                 RadioButton radioButton = findViewById(checkedId);
                 if (radioButton.getText().toString().equals("Client")){
-                    clientOrDeliveryMan = 1;
+                    userType = 1;
                     progressDialog.dismiss();
                 }else {
-                    clientOrDeliveryMan = 2;
+                    userType = 2;
                     progressDialog.dismiss();
                 }
-                Log.e("onCheckedChanged: ",String.valueOf(clientOrDeliveryMan));
+                Log.e("onCheckedChanged: ",String.valueOf(userType));
             }
         });
 
         googleLoginBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (clientOrDeliveryMan == 0){
+                if (userType == 0){
                     Toast.makeText(LoginActivity.this, "WARNING : Please select are you delivery man or client !", Toast.LENGTH_SHORT).show();
                 }else {
                     progressDialog.setMessage("Sign in with google ... ");
@@ -150,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString(VISIT_LOGIN, "Y");
-                    editor.putInt(CLIENT_OR_DELIVERY_MAN, clientOrDeliveryMan);
+                    editor.putInt(USER_TYPE, userType);
                     editor.apply();
 
                     Intent intent = new Intent(LoginActivity.this,MainActivity.class);

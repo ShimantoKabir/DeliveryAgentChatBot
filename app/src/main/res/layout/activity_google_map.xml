@@ -15,7 +15,7 @@
         android:id="@+id/custom_toolbar"
         android:background="@android:color/transparent"
         app:popupTheme="@style/AppTheme"
-        app:theme="@style/ToolbarColoredBackArrow"/>
+        app:theme="@style/ToolbarBgColorWhite"/>
 
     <View
         android:background="#e2e2e2"

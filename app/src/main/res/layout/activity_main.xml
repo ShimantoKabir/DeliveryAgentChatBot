@@ -16,7 +16,7 @@
         android:id="@+id/custom_toolbar"
         android:background="@android:color/transparent"
         app:popupTheme="@style/AppTheme"
-        app:theme="@style/ToolbarColoredBackArrow"/>
+        app:theme="@style/ToolbarBgColorWhite"/>
 
     <android.support.v7.widget.RecyclerView
         android:background="#e7e7e7"

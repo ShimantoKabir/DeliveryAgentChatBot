@@ -34,6 +34,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
@@ -43,7 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private CircleImageView profileImgCIV;
     private Button saveEditBT;
-    private EditText userMameET,userPhoneNoET;
+    private EditText userNameET,userPhoneNoET;
 
     private FirebaseAuth auth;
     private DatabaseReference databaseReference;
@@ -56,11 +58,11 @@ public class ProfileActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
 
     SharedPreferences sharedPreferences;
-    private static final String CLIENT_OR_DELIVERY_MAN = "client_or_delivery_man";
-    private static final String PREFERENCES_KEY        = "freede_preferences";
+    private static final String USER_TYPE = "client_or_delivery_man";
+    private static final String PREFERENCES_KEY = "freede_preferences";
 
-    private int clientOrDeliverManInt = 0;
-    private String clientOrDeliverManString = "null" ;
+    private int userType = 0;
+    private String userTypeString = "null" ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +70,11 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         sharedPreferences = getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
-        clientOrDeliverManInt = sharedPreferences.getInt(CLIENT_OR_DELIVERY_MAN,0);
+        userType = sharedPreferences.getInt(USER_TYPE,0);
 
         profileImgCIV = findViewById(R.id.profile_img_civ);
         saveEditBT = findViewById(R.id.save_edit_bt);
-        userMameET = findViewById(R.id.user_name_et);
+        userNameET = findViewById(R.id.user_name_et);
         userPhoneNoET = findViewById(R.id.user_phone_no_et);
 
         auth = FirebaseAuth.getInstance();
@@ -81,16 +83,76 @@ public class ProfileActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
 
-        if (clientOrDeliverManInt==1) {
-            clientOrDeliverManString = "clientInfo";
+        if (userType==1) {
+            userTypeString = "clientPic";
         }else {
-            clientOrDeliverManString = "deliveryManInfo";
+            userTypeString = "deliveryPic";
         }
 
-        Log.e("clientOrDeliverMan",clientOrDeliverManString);
+        Log.e("clientOrDeliverMan",userTypeString);
 
-        if (!clientOrDeliverManString.equals("null")){
-            databaseReference.child("UserInfo").child(clientOrDeliverManString).child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Getting User Information ... ");
+        progressDialog.show();
+
+        if (isNetworkAvailable()){
+
+            storageReference.child("ProfilePicture/"+currentUser.getUid()+".jpg").getDownloadUrl()
+            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    String imageURL = uri.toString();
+                    Picasso.with(ProfileActivity.this)
+                            .load(imageURL)
+                            .fit()
+                            .centerCrop()
+                            .placeholder(R.drawable.profile_img)
+                            .into(profileImgCIV, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    progressDialog.dismiss();
+                                    databaseReference.child("UserInfo").child(currentUser.getUid())
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            String userName = dataSnapshot.child("userName").getValue().toString();
+                                            String userPhoneNumber = dataSnapshot.child("userPhoneNumber").getValue().toString();
+                                            userNameET.setText(userName);
+                                            userPhoneNoET.setText(userPhoneNumber);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            Log.e("onCancelled: ",databaseError.getMessage());
+                                        }
+                                    });
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    Toast.makeText(ProfileActivity.this, "SORRY : Can't show profile image ! ", Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                }
+                            });
+
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                    Toast.makeText(ProfileActivity.this, "INFO : Image and information did not updated yet !", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
+
+
+        }
+
+        if (!userTypeString.equals("null")){
+            databaseReference.child("UserInfo").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Log.e("onDataChange: ", String.valueOf(dataSnapshot.getChildrenCount()));
@@ -119,7 +181,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                 if (isNetworkAvailable()){
 
-                    String userName = userMameET.getText().toString();
+                    String userName = userNameET.getText().toString();
                     String userPhoneNumber = userPhoneNoET.getText().toString();
 
                     Log.e("onClick: ", String.valueOf(filePath));
@@ -130,7 +192,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                     }else {
 
-                        updateProfile(currentUser.getUid(),userName,userPhoneNumber,clientOrDeliverManString);
+                        updateProfile(currentUser.getUid(),userName,userPhoneNumber,userType);
 
                     }
 
@@ -145,7 +207,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private void updateProfile(final String uid, final String userName, final String userPhoneNumber, final String clientOrDeliverManString) {
+    private void updateProfile(final String uid, final String userName, final String userPhoneNumber, final int userType) {
 
         if (filePath != null) {
 
@@ -153,7 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
             progressDialog.setCancelable(false);
             progressDialog.show();
 
-            StorageReference riversRef = storageReference.child(clientOrDeliverManString+"/"+uid+"/profile_picture/pic.jpg");
+            StorageReference riversRef = storageReference.child("ProfilePicture/"+uid+".jpg");
             riversRef.putFile(filePath)
             .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -161,21 +223,21 @@ public class ProfileActivity extends AppCompatActivity {
 
                     final String profileImageUrl = taskSnapshot.getDownloadUrl().toString();
 
-                    databaseReference.child("UserInfo").child(clientOrDeliverManString).child(uid).child("userName").setValue(userName)
+                    databaseReference.child("UserInfo").child(uid).child("userName").setValue(userName)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if (task.isSuccessful()){
 
-                                databaseReference.child("UserInfo").child(clientOrDeliverManString).child(uid).child("userPhoneNumber").setValue(userPhoneNumber)
+                                databaseReference.child("UserInfo").child(uid).child("userPhoneNumber").setValue(userPhoneNumber)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
                                         if (task.isSuccessful()){
 
-                                            databaseReference.child("UserInfo").child(clientOrDeliverManString).child(uid).child("imgUrl").setValue(profileImageUrl)
+                                            databaseReference.child("UserInfo").child(uid).child("imgUrl").setValue(profileImageUrl)
                                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {

@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PREFERENCES_KEY        = "freede_preferences";
     private static final String VISIT_LOGIN            = "visit_login";
-    private static final String CLIENT_OR_DELIVERY_MAN = "client_or_delivery_man";
+    private static final String USER_TYPE = "client_or_delivery_man";
 
     SharedPreferences sharedPreferences;
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
-    private int clientOrDeliverMan = 0;
+    private int userType = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.custom_toolbar);
         toolbar.setTitle("Home");
-        toolbar.setTitleTextColor(getResources().getColor(R.color.colorPrimary));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -182,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
                 extraUserQuery = new ExtraUserQuery(false,"nothing");
 
-                clientOrDeliverMan = sharedPreferences.getInt(CLIENT_OR_DELIVERY_MAN,0);
+                userType = sharedPreferences.getInt(USER_TYPE,0);
 
                 String startLat = getIntent().getExtras().getString("startLat");
                 String startLon = getIntent().getExtras().getString("startLon");
@@ -214,29 +213,19 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-                Log.e("onCreate: ", String.valueOf(clientOrDeliverMan));
+                Log.e("onCreate: ", String.valueOf(userType));
 
 
             }catch (Exception e){
                 e.printStackTrace();
             }
 
-            if (clientOrDeliverMan != 0){
+            String deviceToken = FirebaseInstanceId.getInstance().getToken();
 
-                if (clientOrDeliverMan==1){
-                    // delivery man block ....
-                    String deviceToken = FirebaseInstanceId.getInstance().getToken();
-                    databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
-                    databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).child("deviceToken").setValue(deviceToken);
+            databaseReference.child("UserInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
+            databaseReference.child("UserInfo").child(currentUser.getUid()).child("deviceToken").setValue(deviceToken);
+            databaseReference.child("UserInfo").child(currentUser.getUid()).child("userType").setValue(userType);
 
-                }else {
-                    // client block ...
-                    String deviceToken = FirebaseInstanceId.getInstance().getToken();
-                    databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("id").setValue(currentUser.getUid());
-                    databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).child("deviceToken").setValue(deviceToken);
-                }
-
-            }
 
             sendIV.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -409,43 +398,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkClientOrNot() {
 
-        databaseReference.child("UserInfo").child("clientInfo").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    showBotResponse("Now i am going to show you the job that offered by me");
-                    Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
-                    startActivity(intent);
-                }else {
-                    showBotResponse("SORRY : Sim/Mam you currently you are not a client !");
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("onCancelled: ",databaseError.getMessage());
-            }
-        });
+        if (userType == 1){
+
+            showBotResponse("Now i am going to show you the job that offered by me");
+            Intent intent = new Intent(MainActivity.this,ClientOfferedJobActivity.class);
+            startActivity(intent);
+
+        }else {
+            showBotResponse("SORRY : Sim/Mam you currently you are not a client !");
+        }
 
     }
 
     private void checkDeliveryManOrNot() {
 
-        databaseReference.child("UserInfo").child("deliveryManInfo").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    showBotResponse("Now i am going to redirect you to job portal");
-                    Intent intent = new Intent(MainActivity.this,JobPortalActivity.class);
-                    startActivity(intent);
-                }else {
-                    showBotResponse("SORRY : Sim/Mam you currently you are not a delivery man !");
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("onCancelled: ",databaseError.getMessage());
-            }
-        });
+        if (userType == 2){
+
+            showBotResponse("Now i am going to redirect you to job portal");
+            Intent intent = new Intent(MainActivity.this,JobPortalActivity.class);
+            startActivity(intent);
+
+        }else {
+            showBotResponse("SORRY : Sim/Mam you currently you are not a delivery man !");
+        }
 
     }
 
@@ -541,7 +516,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        int cod = sharedPreferences.getInt(CLIENT_OR_DELIVERY_MAN,0);
+        int cod = sharedPreferences.getInt(USER_TYPE,0);
 
         if (cod == 1){
             getMenuInflater().inflate(R.menu.client_toolbar_menu,menu);
